@@ -1,5 +1,0 @@
-C:\mattdev\MTG\MTGCommon\bin\Debug\MTGCommon.dll
-C:\mattdev\MTG\MTGCommon\bin\Debug\MTGCommon.pdb
-C:\mattdev\MTG\MTGCommon\obj\Debug\ResolveAssemblyReference.cache
-C:\mattdev\MTG\MTGCommon\obj\Debug\MTGCommon.dll
-C:\mattdev\MTG\MTGCommon\obj\Debug\MTGCommon.pdb
