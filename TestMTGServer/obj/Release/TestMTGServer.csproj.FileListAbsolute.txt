@@ -1,0 +1,16 @@
+C:\mattdev\MTG\TestMTGServer\bin\Release\TestMTGServer.exe
+C:\mattdev\MTG\TestMTGServer\bin\Release\TestMTGServer.pdb
+C:\mattdev\MTG\TestMTGServer\obj\Release\ResolveAssemblyReference.cache
+C:\mattdev\MTG\TestMTGServer\obj\Release\TestMTGServer.Properties.Resources.resources
+C:\mattdev\MTG\TestMTGServer\obj\Release\TestMTGServer.csproj.GenerateResource.Cache
+C:\mattdev\MTG\TestMTGServer\obj\Release\TestMTGServer.exe
+C:\mattdev\MTG\TestMTGServer\obj\Release\TestMTGServer.pdb
+C:\mattdev\MTG\TestMTGServer\bin\Release\MTGService.resx
+C:\mattdev\MTG\TestMTGServer\bin\Release\MTGService.cs
+C:\mattdev\MTG\TestMTGServer\bin\Release\MTGService.Designer.cs
+C:\mattdev\MTG\TestMTGServer\bin\Release\MTGServer.exe
+C:\mattdev\MTG\TestMTGServer\bin\Release\MySql.Data.dll
+C:\mattdev\MTG\TestMTGServer\bin\Release\MTGServer.pdb
+C:\mattdev\MTG\TestMTGServer\obj\Release\TestMTGServer.MTGServiceTesterForm.resources
+C:\mattdev\MTG\TestMTGServer\bin\Release\MTGCommon.dll
+C:\mattdev\MTG\TestMTGServer\bin\Release\MTGCommon.pdb

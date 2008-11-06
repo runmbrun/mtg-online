@@ -1,0 +1,10 @@
+C:\Mattdev\MTG\MTGClient\bin\Debug\MTGClient.exe
+C:\Mattdev\MTG\MTGClient\bin\Debug\MTGClient.pdb
+C:\Mattdev\MTG\MTGClient\obj\Debug\ResolveAssemblyReference.cache
+C:\Mattdev\MTG\MTGClient\obj\Debug\MTGClient.Properties.Resources.resources
+C:\Mattdev\MTG\MTGClient\obj\Debug\MTGClient.csproj.GenerateResource.Cache
+C:\Mattdev\MTG\MTGClient\obj\Debug\MTGClient.exe
+C:\Mattdev\MTG\MTGClient\obj\Debug\MTGClient.pdb
+C:\mattdev\MTG\MTGClient\obj\Debug\MTGClient.MTGClientForm.resources
+C:\mattdev\MTG\MTGClient\bin\Debug\MTGCommon.dll
+C:\mattdev\MTG\MTGClient\bin\Debug\MTGCommon.pdb

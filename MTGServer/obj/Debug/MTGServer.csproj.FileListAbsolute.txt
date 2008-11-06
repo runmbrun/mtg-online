@@ -1,0 +1,14 @@
+C:\Mattdev\MTG\MTGServer\bin\Debug\MTGServer.exe
+C:\Mattdev\MTG\MTGServer\bin\Debug\MTGServer.pdb
+C:\Mattdev\MTG\MTGServer\bin\Debug\MySql.Data.dll
+C:\Mattdev\MTG\MTGServer\obj\Debug\ResolveAssemblyReference.cache
+C:\Mattdev\MTG\MTGServer\obj\Debug\MTGServer.csproj.GenerateResource.Cache
+C:\Mattdev\MTG\MTGServer\obj\Debug\MTGServer.exe
+C:\Mattdev\MTG\MTGServer\obj\Debug\MTGServer.pdb
+C:\mattdev\MTG\MTGServer\bin\Debug\MTGService.resx
+C:\mattdev\MTG\MTGServer\bin\Debug\MTGService.cs
+C:\mattdev\MTG\MTGServer\bin\Debug\MTGService.Designer.cs
+C:\mattdev\MTG\MTGServer\obj\Debug\MTGServer.MTGService.resources
+C:\mattdev\MTG\MTGServer\obj\Debug\MTGServer.MyNewServiceInstaller.resources
+C:\mattdev\MTG\MTGServer\bin\Debug\MTGCommon.dll
+C:\mattdev\MTG\MTGServer\bin\Debug\MTGCommon.pdb
