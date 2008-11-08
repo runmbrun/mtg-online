@@ -85,22 +85,28 @@ namespace MTGServer
         {
             InitializeComponent();
 
-            // start the Event Logger
-            if (!System.Diagnostics.EventLog.SourceExists("MTG Service"))
-            {
-                System.Diagnostics.EventLog.CreateEventSource("MTG Service", "MTG Service Log");
-            }
-
-            //this.EventLog.Source
-            eventLog1.Source = "MTG Service";
-            eventLog1.Log = "MTG Service Log";
-
-
             // this is the string array of all the errors found during processing
             _errorMessages = new String[128];
             _errorMessages.Initialize();
             _errorCount = 0;
 
+            try
+            {
+                // start the Event Logger
+                if (!System.Diagnostics.EventLog.SourceExists("MTG Service"))
+                {
+                    System.Diagnostics.EventLog.CreateEventSource("MTG Service", "MTG Service Log");
+                }
+            }
+            catch (Exception ex)
+            {
+                AddError(ex.Message);
+            }
+
+            //this.EventLog.Source
+            eventLog1.Source = "MTG Service";
+            eventLog1.Log = "MTG Service Log";
+            
             // get the current folder the app is running in and save it            
             _servicePath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().GetModules()[0].FullyQualifiedName);
 
@@ -151,7 +157,13 @@ namespace MTGServer
         /// <param name="args"></param>
         protected override void OnStart(string[] args)
         {
-            eventLog1.WriteEntry("MTG Service is now Starting");
+            try
+            {
+                eventLog1.WriteEntry("MTG Service is now Starting");
+            }
+            catch (Exception ex)
+            {
+            }
 
             // initialize this variable so that we can begin checking
             // the database for requests that are ready to be built
@@ -196,7 +208,13 @@ namespace MTGServer
         /// </summary>
         protected override void OnStop()
         {
-            eventLog1.WriteEntry("MTG Service is Stopping");
+            try
+            {
+                eventLog1.WriteEntry("MTG Service is Stopping");
+            }
+            catch (Exception ex)
+            {
+            }
 
             /*
             // stop the timer so we don't kick off the build portion any more
