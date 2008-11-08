@@ -9,6 +9,7 @@ using System.Text;
 using System.Windows.Forms;
 using System.Net;
 using System.Net.Sockets;
+using MTG;
 
 
 
@@ -115,10 +116,10 @@ namespace MTGClient
                     if (Connected)
                     {
                         //Fill the info for the message to be send
-                        MTG.MTGNetworkPacket packet = new MTG.MTGNetworkPacket();
+                        MTGNetworkPacket packet = new MTGNetworkPacket();
                         String data = String.Format(textBoxUser.Text + ":" + textBoxPassword.Text);
 
-                        packet.OpCode = MTG.MTGNetworkPacket.MTGOpCode.Login;
+                        packet.OpCode = MTGNetworkPacket.MTGOpCode.Login;
                         packet.Data = data;
 
                         byte[] ConvertedData = packet.ToByte();
@@ -138,9 +139,9 @@ namespace MTGClient
                     if (Connected)
                     {
                         //Fill the info for the message to be send
-                        MTG.MTGNetworkPacket packet = new MTG.MTGNetworkPacket();
+                        MTGNetworkPacket packet = new MTGNetworkPacket();
 
-                        packet.OpCode = MTG.MTGNetworkPacket.MTGOpCode.Logout;
+                        packet.OpCode = MTGNetworkPacket.MTGOpCode.Logout;
                         //packet.Data = null;
 
                         byte[] ConvertedData = packet.ToByte();
@@ -277,20 +278,20 @@ namespace MTGClient
 
                 clientSocket.EndReceive(ar);
 
-                MTG.MTGNetworkPacket packet = new MTG.MTGNetworkPacket(byteData);
+                MTGNetworkPacket packet = new MTGNetworkPacket(byteData);
 
                 //Accordingly process the message received
                 switch (packet.OpCode)
                 {
-                    case MTG.MTGNetworkPacket.MTGOpCode.Login:
+                    case MTGNetworkPacket.MTGOpCode.Login:
                         AddStatus("Login: [" + packet.Data.ToString() + "]");
                         break;
 
-                    case MTG.MTGNetworkPacket.MTGOpCode.Logout:
+                    case MTGNetworkPacket.MTGOpCode.Logout:
                         AddStatus("Logout: [" + packet.Data.ToString() + "]");
                         break;
 
-                    case MTG.MTGNetworkPacket.MTGOpCode.PurchaseReceive:
+                    case MTGNetworkPacket.MTGOpCode.PurchaseReceive:
                         AddStatus("Purchase: [" + packet.Data.ToString() + "]");
                         ArrayList List = (ArrayList)packet.Data;
                         AddToCollection(List);
@@ -431,10 +432,10 @@ namespace MTGClient
             else
             {
                 //Fill the info for the message to be send
-                MTG.MTGNetworkPacket packet = new MTG.MTGNetworkPacket();
+                MTGNetworkPacket packet = new MTGNetworkPacket();
                 String data = "1";
 
-                packet.OpCode = MTG.MTGNetworkPacket.MTGOpCode.Purchase;
+                packet.OpCode = MTGNetworkPacket.MTGOpCode.Purchase;
                 packet.Data = data;
 
                 byte[] ConvertedData = packet.ToByte();
