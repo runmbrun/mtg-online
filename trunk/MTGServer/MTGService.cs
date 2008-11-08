@@ -15,6 +15,7 @@ using System.Reflection;
 using System.Threading;
 using System.Net;
 using System.Net.Sockets;
+using MTG;
 
 #endregion
 
@@ -398,8 +399,8 @@ namespace MTGServer
                 
                 //Transform the array of bytes received from the user into an
                 //intelligent form of object Data
-                MTG.MTGNetworkPacket msgReceived = new MTG.MTGNetworkPacket(byteData);
-                MTG.MTGNetworkPacket msgToSend = new MTG.MTGNetworkPacket();
+                MTGNetworkPacket msgReceived = new MTGNetworkPacket(byteData);
+                MTGNetworkPacket msgToSend = new MTGNetworkPacket();
                                 
                 
                 //If the message is to login, logout, or simple text message
@@ -407,7 +408,7 @@ namespace MTGServer
                 switch (msgReceived.OpCode)
                 {
                         // Login
-                    case MTG.MTGNetworkPacket.MTGOpCode.Login:
+                    case MTGNetworkPacket.MTGOpCode.Login:
 
                         String result = "Success";
 
@@ -433,7 +434,7 @@ namespace MTGServer
                         ClientList.Add(clientInfo);                        
 
                         //
-                        msgToSend.OpCode = MTG.MTGNetworkPacket.MTGOpCode.Login;
+                        msgToSend.OpCode = MTGNetworkPacket.MTGOpCode.Login;
                         msgToSend.Data = result;
 
                         message = msgToSend.ToByte();
@@ -444,7 +445,7 @@ namespace MTGServer
                         break;
 
                         // Logout
-                    case MTG.MTGNetworkPacket.MTGOpCode.Logout:
+                    case MTGNetworkPacket.MTGOpCode.Logout:
 
                         //When a user wants to log out of the server then we search for her 
                         //in the list of clients and close the corresponding connection
@@ -465,7 +466,7 @@ namespace MTGServer
                         break;
 
                         // Buy
-                    case MTG.MTGNetworkPacket.MTGOpCode.Purchase:
+                    case MTGNetworkPacket.MTGOpCode.Purchase:
 
                         Int32 Number = Convert.ToInt32(msgReceived.Data.ToString());
                         ArrayList CardPack = new ArrayList();
@@ -473,7 +474,7 @@ namespace MTGServer
                         // mmb - can buy multiple card packs
                         for (Int32 i = 0; i < Number; i++)
                         {
-                            MTG.MTGCard card = new MTG.MTGCard();
+                            MTGCard card = new MTGCard();
                             card.ID = 1;
                             card.Name = "Test Card";
                             card.Power = "1";
@@ -483,7 +484,7 @@ namespace MTGServer
                         }
 
                         //
-                        msgToSend.OpCode = MTG.MTGNetworkPacket.MTGOpCode.PurchaseReceive;
+                        msgToSend.OpCode = MTGNetworkPacket.MTGOpCode.PurchaseReceive;
                         msgToSend.Data = CardPack;
 
                         message = msgToSend.ToByte();
@@ -495,7 +496,7 @@ namespace MTGServer
                 }
 
                 //If the user is logging out then we need not listen from her
-                if (msgReceived.OpCode != MTG.MTGNetworkPacket.MTGOpCode.Logout)
+                if (msgReceived.OpCode != MTGNetworkPacket.MTGOpCode.Logout)
                 {
                     //Start listening to the message send by the user
                     clientSocket.BeginReceive(byteData, 0, byteData.Length, SocketFlags.None, new AsyncCallback(OnReceive), clientSocket);
