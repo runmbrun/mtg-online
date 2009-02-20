@@ -35,11 +35,16 @@ namespace MTGServer
         //private static Thread threadFirst;
 
         // DB vars
+        /*
+        // mysql stuff
         private static MySqlConnection m_Connection;
         private String m_strDBServer = "dbserver";
         private String m_strDBUser = "user";
         private String m_strDBPassword = "password";
         private String m_strDBName = "db";
+        */
+        // sql server stuff
+        MTGDatabase MTGDB;
 
         // Error Handling vars
         private String _servicePath;
@@ -200,6 +205,14 @@ namespace MTGServer
             {
                 AddError(String.Format("OnStart: Server TCP {0}", ex.Message));
             }
+
+            // database connection initialization
+            MTGDB = new MTGDatabase();
+            if (!MTGDB.Connect())
+            {
+                // error!
+                AddError(String.Format("ERROR: Unable to connect to the database. {0}", MTGDB.GetLastError));
+            }
         }
 
         /// <summary>
@@ -240,11 +253,13 @@ namespace MTGServer
             // make sure that timer will not start again
             m_bReadyToCheck = false;
 */
+            /*
             // close the database connection if it's open
             if (m_Connection != null)
             {
                 m_Connection.Close();
             }
+            */
 
             // close all the network clients talking to this server
             if (ClientList != null)
@@ -252,6 +267,16 @@ namespace MTGServer
                 foreach (ClientInfo client in ClientList)
                 {
                     client.Socket.Close();
+                }
+            }
+
+            // close down the database connection
+            if (MTGDB.Connected)
+            {
+                if (MTGDB.Disconnect())
+                {
+                    // error!
+                    AddError(String.Format("ERROR: Unable to disconnect to the database. {0}", MTGDB.GetLastError));
                 }
             }
         }
@@ -280,6 +305,8 @@ namespace MTGServer
         }
         #endregion
 
+        #region MySQL code
+        /*
         /// <summary>
         /// This function attempts to connect to the mysql Database
         /// </summary>
@@ -312,6 +339,8 @@ namespace MTGServer
 
             return bConnected;
         }
+        */
+        #endregion
 
         /// <summary>
         /// 
@@ -428,7 +457,7 @@ namespace MTGServer
                         // Login
                     case MTGNetworkPacket.MTGOpCode.Login:
 
-                        String result = "Success";
+                        Int32 result = 0;
 
                         // verify that this user can log on
                         // mmb - db stuff                        
@@ -436,14 +465,15 @@ namespace MTGServer
                         String user = data.Substring(0, data.IndexOf(":"));
                         String pass = data.Substring(data.IndexOf(":") + 1);
 
-                        if (user == "admin" && pass == "pass")
-                        {
-                            result += "Admin";
-                        }
-                        else if (user != "test" && pass != "pass")
-                        {
-                            // invalid login
-                            result = "Failure";
+                        // now check the user against the database...
+                        if (MTGDB.ValidateUser(user, pass))
+                        {   
+                            result = 1;
+
+                            if (MTGDB.IsAdmin(user, pass))
+                            {
+                                result += 1;
+                            }
                         }
 
                         //When a user logs in to the server then we add them to our list of clients
@@ -457,13 +487,42 @@ namespace MTGServer
 
                         message = msgToSend.ToByte();
 
+                        clientSocket.BeginSend(message, 0, message.Length, SocketFlags.None, new AsyncCallback(OnSend), clientSocket);
+
+                        if (result == 0)                        
+                        {
+                            // error, just disconnect this connection
+                            foreach (ClientInfo client in ClientList)
+                            {
+                                if (client.Socket == clientSocket)
+                                {
+                                    // mmb - do something...
+                                    ClientList.Remove(client);
+                                    break;
+                                }
+                            }
+                        }
+
+                        // mmb - todo:
                         //Send the name of the users in the chat room
-                        clientSocket.BeginSend(message, 0, message.Length, SocketFlags.None, new AsyncCallback(OnSend), clientSocket);          
+                        // send the collection results for this user
 
                         break;
 
                         // Logout
                     case MTGNetworkPacket.MTGOpCode.Logout:
+
+                        // save 
+                        // mmb - todo
+
+                        // send an acknowledgement logout message back to client
+                        msgToSend.OpCode = MTGNetworkPacket.MTGOpCode.Logout;
+                        msgToSend.Data = "1";
+
+                        message = msgToSend.ToByte();
+
+                        clientSocket.BeginSend(message, 0, message.Length, SocketFlags.None, new AsyncCallback(OnSendAndClose), clientSocket);
+
 
                         //When a user wants to log out of the server then we search for her 
                         //in the list of clients and close the corresponding connection
@@ -479,8 +538,6 @@ namespace MTGServer
 
                         clientSocket.Close();
 
-                        //mmb - logout
-
                         break;
 
                         // Buy
@@ -493,11 +550,27 @@ namespace MTGServer
                         for (Int32 i = 0; i < Number; i++)
                         {
                             MTGCard card = new MTGCard();
-                            card.ID = 1;
-                            card.Name = "Test Card";
-                            card.Power = "1";
-                            card.Toughness = "1";
-                            card.Type = "Creature";
+                            card.ID = 129559;
+                            card.Name = "Forest";
+                            card.Power = "-1";
+                            card.Toughness = "-1";
+                            card.Type = "Land";
+                            CardPack.Add(card);
+
+                            card = new MTGCard();
+                            card.ID = 129459;
+                            card.Name = "Air Elemental";
+                            card.Power = "4";
+                            card.Toughness = "4";
+                            card.Type = "Creature - Elemental";
+                            CardPack.Add(card);
+
+                            card = new MTGCard();
+                            card.ID = 129495;
+                            card.Name = "Battle Gnomes";
+                            card.Power = "0";
+                            card.Toughness = "3";
+                            card.Type = "Creature - Elemental";
                             CardPack.Add(card);
                         }
 
@@ -540,6 +613,30 @@ namespace MTGServer
             catch (Exception ex)
             {
                 AddError(String.Format("OnSend: {0}", ex.Message));
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="ar"></param>
+        private void OnSendAndClose(IAsyncResult ar)
+        {
+            try
+            {
+                // message was successfully sent
+                Socket client = (Socket)ar.AsyncState;
+                client.EndSend(ar);
+                client.Close();
+            }
+            catch (ObjectDisposedException exo)
+            {
+                //mmb - what to do here?
+                AddError("OnSendAndClose:  Unable to send message to the server. [" + exo.Message + "]");
+            }
+            catch (Exception ex)
+            {
+                AddError("OnSendAndClose:  Unable to send message to the server. [" + ex.Message + "]");
             }
         }
 
