@@ -9,7 +9,6 @@ using System.Data;
 using System.Diagnostics;
 using System.ServiceProcess;
 using System.Text;
-using MySql.Data.MySqlClient;
 using System.Timers;
 using System.Reflection;
 using System.Threading;
@@ -31,19 +30,7 @@ namespace MTGServer
         // Debug vars
         public Boolean Debug = false;
 
-        // Threading vars
-        //private static Thread threadFirst;
-
         // DB vars
-        /*
-        // mysql stuff
-        private static MySqlConnection m_Connection;
-        private String m_strDBServer = "dbserver";
-        private String m_strDBUser = "user";
-        private String m_strDBPassword = "password";
-        private String m_strDBName = "db";
-        */
-        // sql server stuff
         MTGDatabase MTGDB;
 
         // Error Handling vars
@@ -51,26 +38,19 @@ namespace MTGServer
         private String[] _errorMessages;
         private Int32 _errorCount;
 
-        // Timer vars
-        private static System.Timers.Timer m_Timer;
-        private Boolean m_bReadyToCheck;
-        private Int32 _timerInterval;
-        private Object thisLock = new Object();
-
         // Network vars
         private Int32 _port = 4545;
         byte[] byteData = new byte[1024];
 
-        //The ClientInfo structure holds 
-        //the required information about every
-        //client connected to the server
+        //The ClientInfo structure holds the required information 
+        // about every client connected to the server
         struct ClientInfo
         {
             //Socket of the client
             public Socket Socket;
             
             //Name by which the user logged into the chat room
-            //public String Name;
+            public String Player;
         }
 
         //The collection of all clients logged 
@@ -137,8 +117,6 @@ namespace MTGServer
                 AddError(String.Format("ERROR: Unable to read the config file"));
             }
 
-            _timerInterval = 0;
-
             ClientList = new ArrayList();
         }
         
@@ -168,20 +146,8 @@ namespace MTGServer
             }
             catch (Exception ex)
             {
+                eventLog1.WriteEntry("MTG Service failed while trying to start: " + ex.Message);
             }
-
-            // initialize this variable so that we can begin checking
-            // the database for requests that are ready to be built
-            //m_bReadyToCheck = true;
-
-            // First run the process on a separate thread once 
-            // to clear out anything that is currently in the queue
-            // This will prevent the Starting of this service to take too long
-            //threadFirst = new Thread(new ThreadStart(BeginProcess));
-            //threadFirst.Start();
-
-            // now start the timer so that it will continually process
-            //StartTimer();
 
             // This is the new code that will start this service listening on a specific TCP port
             try
@@ -227,41 +193,10 @@ namespace MTGServer
             }
             catch (Exception ex)
             {
+                eventLog1.WriteEntry("MTG Service failed while try to stop the service: " + ex.Message);
             }
 
-            /*
-            // stop the timer so we don't kick off the build portion any more
-            m_Timer.Stop();
-
-            // the number of milliseconds to sleep before checking to see if 
-            // the app is still running
-            Int32 iSecondsToSleep = 3000;
-            
-            // check to see if the first Thread is still running
-            while (threadFirst.ThreadState == System.Threading.ThreadState.Running)
-            {
-                System.Threading.Thread.Sleep(iSecondsToSleep);
-            }
-
-            // now wait for the any current builds to complete before stopping
-            while (!m_bReadyToCheck)
-            {
-                // sleep here for 3 seconds and then check if build is completed again
-                System.Threading.Thread.Sleep(iSecondsToSleep);
-            }
-
-            // make sure that timer will not start again
-            m_bReadyToCheck = false;
-*/
-            /*
-            // close the database connection if it's open
-            if (m_Connection != null)
-            {
-                m_Connection.Close();
-            }
-            */
-
-            // close all the network clients talking to this server
+             // close all the network clients talking to this server
             if (ClientList != null)
             {
                 foreach (ClientInfo client in ClientList)
@@ -305,99 +240,6 @@ namespace MTGServer
         }
         #endregion
 
-        #region MySQL code
-        /*
-        /// <summary>
-        /// This function attempts to connect to the mysql Database
-        /// </summary>
-        public bool DBConnect()
-        {
-            bool bConnected = false;
-
-
-            if (m_Connection != null)
-            {
-                m_Connection.Close();
-            }
-
-            string strConn = String.Format("server={0};user id={1}; password={2}; database={3}; pooling=true;Connection Lifetime=60;Connection Reset=true;Max Pool Size=4",
-                m_strDBServer, m_strDBUser, m_strDBPassword, m_strDBName);
-
-            try
-            {
-                m_Connection = new MySqlConnection(strConn);
-                m_Connection.Open();
-
-                bConnected = true;
-            }
-            catch (MySqlException ex)
-            {
-                AddError(String.Format("Error connecting to the server: {0}", ex.Message));
-                AddError(String.Format("  Connection String= {0}", strConn));
-                eventLog1.WriteEntry("Build MTGServer was not able to connect to the database");
-            }
-
-            return bConnected;
-        }
-        */
-        #endregion
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public void StartTimer()
-        {
-            // Normally, the timer is declared at the class level, so
-            // that it doesn't go out of scope when the method ends.
-            // is executing. However, KeepAlive must be used at the
-            // end of Main, to prevent the JIT compiler from allowing 
-            // aggressive garbage collection to occur before Main 
-            // ends.
-            m_Timer = new System.Timers.Timer();
-
-            // Hook up the Elapsed event for the timer.
-            m_Timer.Elapsed += new ElapsedEventHandler(OnTimedEvent);
-
-            // Set the Interval to the number of seconds in the config file (X * 1000 milliseconds).            
-            m_Timer.Interval = _timerInterval;
-            m_Timer.Enabled = true;
-
-            // Keep the timer alive until the end of Main.
-            GC.KeepAlive(m_Timer);
-        }
-
-        /// <summary>
-        /// Specify what you want to happen when the Elapsed event is raised.
-        /// </summary>
-        /// <param name="source"></param>
-        /// <param name="e"></param>
-        private void OnTimedEvent(object source, ElapsedEventArgs e)
-        {
-            //BeginProcess();
-
-            // thread this?
-            //threadFirst.Start();
-        }
-
-        /// <summary>
-        /// Here is the actual processing
-        /// </summary>
-        private void BeginProcess()
-        {
-            if (m_bReadyToCheck)
-            {
-                lock (thisLock)
-                {
-                    m_bReadyToCheck = false;
-
-                    // what should be done if there are errors?
-                    // options are to keep on going, or stop everything until the problem is fixed
-                    // Right now I think we'll just keep on going to see what type of errors we run into
-                    m_bReadyToCheck = true;
-                }
-            }
-        }
-
         /// <summary>
         /// Adds an error string to the errors string array
         /// </summary>
@@ -405,6 +247,7 @@ namespace MTGServer
         private void AddError(String ErrorMessage)
         {
             _errorMessages[_errorCount++] = ErrorMessage;
+            // mmb - need to write this to a log file too!
         }
 
         /// <summary>
@@ -454,13 +297,12 @@ namespace MTGServer
                 //then when send to others the type of the message remains the same
                 switch (msgReceived.OpCode)
                 {
-                        // Login
+                    // *** Login ***
                     case MTGNetworkPacket.MTGOpCode.Login:
 
                         Int32 result = 0;
 
                         // verify that this user can log on
-                        // mmb - db stuff                        
                         String data = msgReceived.Data.ToString();
                         String user = data.Substring(0, data.IndexOf(":"));
                         String pass = data.Substring(data.IndexOf(":") + 1);
@@ -479,9 +321,10 @@ namespace MTGServer
                         //When a user logs in to the server then we add them to our list of clients
                         clientInfo = new ClientInfo();
                         clientInfo.Socket= clientSocket;
-                        ClientList.Add(clientInfo);                        
+                        clientInfo.Player = user;
+                        ClientList.Add(clientInfo);
 
-                        //
+                        // Send back a login packet to the user to tell them if user was validate against db
                         msgToSend.OpCode = MTGNetworkPacket.MTGOpCode.Login;
                         msgToSend.Data = result;
 
@@ -496,7 +339,7 @@ namespace MTGServer
                             {
                                 if (client.Socket == clientSocket)
                                 {
-                                    // mmb - do something...
+                                    // remove this user from the client list
                                     ClientList.Remove(client);
                                     break;
                                 }
@@ -504,15 +347,18 @@ namespace MTGServer
                         }
 
                         // mmb - todo:
-                        //Send the name of the users in the chat room
-                        // send the collection results for this user
+                        //Send the name of the users in the chat room... User has logged in.
+                        
+                    
+                        // mmb - todo:
+                        // send the collection data for this user to his client
 
                         break;
-
-                        // Logout
+                        
+                    // *** Logout ***
                     case MTGNetworkPacket.MTGOpCode.Logout:
 
-                        // save 
+                        // save data like logout time, update online field
                         // mmb - todo
 
                         // send an acknowledgement logout message back to client
@@ -530,17 +376,21 @@ namespace MTGServer
                         {
                             if (client.Socket == clientSocket)
                             {
-                                // mmb - do something...
+                                // remove user from client list
                                 ClientList.Remove(client);
                                 break;
                             }
                         }
 
+                        // break the network connection with the client
                         clientSocket.Close();
 
-                        break;
+                        // mmb - todo:
+                        //Send the name of the users in the chat room... User has logged out.
 
-                        // Buy
+                        break;
+                        
+                    // *** Buy ***
                     case MTGNetworkPacket.MTGOpCode.Purchase:
 
                         Int32 Number = Convert.ToInt32(msgReceived.Data.ToString());
@@ -580,9 +430,15 @@ namespace MTGServer
 
                         message = msgToSend.ToByte();
 
-                        //Send the name of the users in the chat room
+                        // send back the new collection with the purchased items in it
                         clientSocket.BeginSend(message, 0, message.Length, SocketFlags.None, new AsyncCallback(OnSend), clientSocket);          
 
+                        break;
+                        
+                    // *** Catchall...
+                    default:
+                        // record this because it shouldn't be happening
+                        AddError(String.Format("OnReceive: Unknown Packet Recieved. {0}", msgReceived.OpCode));
                         break;
                 }
 

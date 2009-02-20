@@ -18,9 +18,11 @@ namespace MTGCommon
             set { cards = value; }
         }
 
-        // mmb - todo
-        //private Dictionary <String,ArrayList> decks;
-
-
+        private Dictionary <String,ArrayList> decks;
+        public Dictionary<String, ArrayList> Decks
+        {
+            get { return decks; }
+            set { decks = value; }
+        }
     }
 }
