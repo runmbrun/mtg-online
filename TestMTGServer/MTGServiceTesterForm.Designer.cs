@@ -72,7 +72,7 @@
             this.textBoxStatus.Size = new System.Drawing.Size(100, 20);
             this.textBoxStatus.TabIndex = 3;
             // 
-            // Form1
+            // MTGServiceTesterForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -81,8 +81,8 @@
             this.Controls.Add(this.label1);
             this.Controls.Add(this.buttonStart);
             this.Controls.Add(this.buttonStop);
-            this.Name = "Form1";
-            this.Text = "Form1";
+            this.Name = "MTGServiceTesterForm";
+            this.Text = "MTGServer Tester";
             this.ResumeLayout(false);
             this.PerformLayout();
 
