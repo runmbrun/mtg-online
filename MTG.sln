@@ -15,7 +15,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestMTGServer", "TestMTGSer
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MTGCommon", "MTGCommon\MTGCommon.csproj", "{B1BC882B-3872-47EB-B6F3-5E2E172266C6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestMTGGatherer", "TestMTGGatherer\TestMTGGatherer.csproj", "{2040E6FA-A24B-4C60-A513-982E27ECA0EC}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MTGDataGatherer", "MTGDataGatherer\MTGDataGatherer.csproj", "{2040E6FA-A24B-4C60-A513-982E27ECA0EC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

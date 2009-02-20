@@ -35,18 +35,13 @@ namespace MTG
             { 
                 _data = value;
 
-                //if (_data.GetType() == typeof(String))
+                // these are the only 2 opcodes that will send in a string
                 if (OpCode == MTGOpCode.Login || OpCode == MTGOpCode.Purchase)
                 {
                     _packetLength = _data.ToString().Length;
                 }
                 else
                 {
-                    //_packetLength = Marshal.SizeOf(_data);                    
-
-                    //byte[] b = (byte[])_data;
-                    //_packetLength = b.Length;
-
                     MemoryStream memStream1 = new MemoryStream();
                     BinaryFormatter formatter = new BinaryFormatter();
                     formatter.Serialize(memStream1, _data);
@@ -67,7 +62,7 @@ namespace MTG
             Purchase,           //Purchase some cards
             PurchaseReceive,    //Purchase of some cards are being received
             ReceiveCollection,  // receive players collection of cards
-            Null        //No command
+            Null                //No command
         }
 
         /// <summary>
@@ -95,7 +90,7 @@ namespace MTG
             //This checks for a null message field
             if (PacketLength > 0)
             {                
-                //if (Data.GetType() == typeof(String))
+                // these are the only 2 opcodes that will send in a string
                 if (OpCode == MTGOpCode.Login || OpCode == MTGOpCode.Purchase)
                 {
                     Data = Encoding.UTF8.GetString(data, 8, PacketLength);
@@ -129,16 +124,14 @@ namespace MTG
              if (Data != null)
              {
                  result.AddRange(BitConverter.GetBytes(PacketLength));
-                                  
-                 //if (Data.GetType() == typeof(String))
+
+                 // these are the only 2 opcodes that will send in a string
                  if (OpCode == MTGOpCode.Login || OpCode == MTGOpCode.Purchase)
                  {
                      result.AddRange(Encoding.UTF8.GetBytes(Data.ToString()));
                  }
                  else
                  {
-                     //byte[] b = (byte[])Data;
-
                      MemoryStream memStream1 = new MemoryStream();
                      BinaryFormatter formatter = new BinaryFormatter();
                      formatter.Serialize(memStream1, _data);
