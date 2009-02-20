@@ -62,10 +62,11 @@ namespace MTG
 
         public enum MTGOpCode
         {
-            Login,      //Log into the server
-            Logout,     //Logout of the server
-            Purchase,   //Purchase some cards
-            PurchaseReceive,   //Purchase of some cards are being received
+            Login,              //Log into the server
+            Logout,             //Logout of the server
+            Purchase,           //Purchase some cards
+            PurchaseReceive,    //Purchase of some cards are being received
+            ReceiveCollection,  // receive players collection of cards
             Null        //No command
         }
 
