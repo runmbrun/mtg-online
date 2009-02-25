@@ -36,7 +36,7 @@ namespace MTG
                 _data = value;
 
                 // these are the only 2 opcodes that will send in a string
-                if (OpCode == MTGOpCode.Login || OpCode == MTGOpCode.Purchase)
+                if (OpCode == MTGOpCode.Login || OpCode == MTGOpCode.Purchase || OpCode == MTGOpCode.Chat)
                 {
                     _packetLength = _data.ToString().Length;
                 }
@@ -61,7 +61,8 @@ namespace MTG
             Logout,             //Logout of the server
             Purchase,           //Purchase some cards
             PurchaseReceive,    //Purchase of some cards are being received
-            ReceiveCollection,  // receive players collection of cards
+            ReceiveCollection,  //Receive players collection of cards
+            Chat,               //Chat
             Null                //No command
         }
 
@@ -91,7 +92,7 @@ namespace MTG
             if (PacketLength > 0)
             {                
                 // these are the only 2 opcodes that will send in a string
-                if (OpCode == MTGOpCode.Login || OpCode == MTGOpCode.Purchase)
+                if (OpCode == MTGOpCode.Login || OpCode == MTGOpCode.Purchase || OpCode == MTGOpCode.Chat)
                 {
                     Data = Encoding.UTF8.GetString(data, 8, PacketLength);
                 }
@@ -126,7 +127,7 @@ namespace MTG
                  result.AddRange(BitConverter.GetBytes(PacketLength));
 
                  // these are the only 2 opcodes that will send in a string
-                 if (OpCode == MTGOpCode.Login || OpCode == MTGOpCode.Purchase)
+                 if (OpCode == MTGOpCode.Login || OpCode == MTGOpCode.Purchase || OpCode == MTGOpCode.Chat)
                  {
                      result.AddRange(Encoding.UTF8.GetBytes(Data.ToString()));
                  }

@@ -285,6 +285,7 @@ namespace MTGServer
 
                 ClientInfo clientInfo;
                 byte[] message = null;
+                String User = "Player [Unknown] ";
 
                 
                 //Transform the array of bytes received from the user into an
@@ -332,7 +333,8 @@ namespace MTGServer
 
                         clientSocket.BeginSend(message, 0, message.Length, SocketFlags.None, new AsyncCallback(OnSend), clientSocket);
 
-                        if (result == 0)                        
+                        // this player isn't a valid player, so disconnect the client
+                        if (result == 0)
                         {
                             // error, just disconnect this connection
                             foreach (ClientInfo client in ClientList)
@@ -345,21 +347,41 @@ namespace MTGServer
                                 }
                             }
                         }
+                        else
+                        {
 
-                        // mmb - todo:
-                        //Send the name of the users in the chat room... User has logged in.
-                        
-                    
-                        // mmb - todo:
-                        // send the collection data for this user to his client
+                            // mmb - todo
+                            // save data like online field, login time, etc
+
+                            //Send the name of the users in the chat room... User has logged in.
+                            // Send back a login packet to the user to tell them if user was validate against db
+                            msgToSend.OpCode = MTGNetworkPacket.MTGOpCode.Chat;
+                            msgToSend.Data = "Player [" + user + "] is now online";
+                            message = msgToSend.ToByte();
+                            foreach (ClientInfo client in ClientList)
+                            {
+                                client.Socket.BeginSend(message, 0, message.Length, SocketFlags.None, new AsyncCallback(OnSend), client.Socket);
+                            }
+                            
+                            // Query DB to get Player's collection and send it back to that client
+                            MTGCollection collection = MTGDB.GetPlayerCollection(user);
+                            if (collection.Cards.Count > 0)
+                            {
+                                // send the collection data for this user to his client  
+                                msgToSend.OpCode = MTGNetworkPacket.MTGOpCode.ReceiveCollection;
+                                msgToSend.Data = collection;
+                                message = msgToSend.ToByte();
+                                clientSocket.BeginSend(message, 0, message.Length, SocketFlags.None, new AsyncCallback(OnSend), clientSocket);
+                            }
+                        }                        
 
                         break;
                         
                     // *** Logout ***
                     case MTGNetworkPacket.MTGOpCode.Logout:
 
-                        // save data like logout time, update online field
                         // mmb - todo
+                        // save data like online field, logout time, etc
 
                         // send an acknowledgement logout message back to client
                         msgToSend.OpCode = MTGNetworkPacket.MTGOpCode.Logout;
@@ -368,6 +390,21 @@ namespace MTGServer
                         message = msgToSend.ToByte();
 
                         clientSocket.BeginSend(message, 0, message.Length, SocketFlags.None, new AsyncCallback(OnSendAndClose), clientSocket);
+
+
+                        //Send the name of the users in the chat room... User has logged in.
+                        // Send back a login packet to the user to tell them if user was validate against db
+                        msgToSend.OpCode = MTGNetworkPacket.MTGOpCode.Chat;
+                        
+                        foreach (ClientInfo client in ClientList)
+                        {
+                            if (client.Socket == clientSocket)
+                            {
+                                User = "Player ["+ client.Player + "] ";
+                            }
+                        }
+                        msgToSend.Data = "Player [" + User + "] is offline";
+                        message = msgToSend.ToByte();
 
 
                         //When a user wants to log out of the server then we search for her 
@@ -380,13 +417,15 @@ namespace MTGServer
                                 ClientList.Remove(client);
                                 break;
                             }
+                            else
+                            {
+                                //Send the name of this logged out player to all the players in the chat room... 
+                                client.Socket.BeginSend(message, 0, message.Length, SocketFlags.None, new AsyncCallback(OnSend), client.Socket);
+                            }
                         }
 
                         // break the network connection with the client
                         clientSocket.Close();
-
-                        // mmb - todo:
-                        //Send the name of the users in the chat room... User has logged out.
 
                         break;
                         
@@ -394,7 +433,10 @@ namespace MTGServer
                     case MTGNetworkPacket.MTGOpCode.Purchase:
 
                         Int32 Number = Convert.ToInt32(msgReceived.Data.ToString());
+
+                        /*
                         ArrayList CardPack = new ArrayList();
+                        
 
                         // mmb - can buy multiple card packs
                         for (Int32 i = 0; i < Number; i++)
@@ -423,10 +465,17 @@ namespace MTGServer
                             card.Type = "Creature - Elemental";
                             CardPack.Add(card);
                         }
+                         * */
+
+                        MTGCollection Collection = new MTGCollection();
+                        Collection.Cards.Add(129559);
+                        Collection.Cards.Add(129459);
+                        Collection.Cards.Add(129495);
 
                         //
                         msgToSend.OpCode = MTGNetworkPacket.MTGOpCode.PurchaseReceive;
-                        msgToSend.Data = CardPack;
+                        //msgToSend.Data = CardPack;
+                        msgToSend.Data = Collection;
 
                         message = msgToSend.ToByte();
 
@@ -434,7 +483,39 @@ namespace MTGServer
                         clientSocket.BeginSend(message, 0, message.Length, SocketFlags.None, new AsyncCallback(OnSend), clientSocket);          
 
                         break;
-                        
+
+                    // *** Chat ***
+                    case MTGNetworkPacket.MTGOpCode.Chat:
+                        // Send this chat to all other online players
+                                                
+                        // verify that this user can log on
+                        String ChatData = msgReceived.Data.ToString();
+                        foreach (ClientInfo client in ClientList)
+                        {
+                            if (client.Socket == clientSocket)
+                            {
+                                // this is the player, collect the name
+                                User = "[" + client.Player + "] ";
+
+                            }
+                        }                        
+                        // send chat message back to other players
+                        msgToSend.OpCode = MTGNetworkPacket.MTGOpCode.Chat;
+                        msgToSend.Data = User + ChatData;
+
+                        message = msgToSend.ToByte();
+
+                        foreach (ClientInfo client in ClientList)
+                        {
+                            if (client.Socket != clientSocket)
+                            {
+                                // send chat message back to other players
+                                client.Socket.BeginSend(message, 0, message.Length, SocketFlags.None, new AsyncCallback(OnSend), client.Socket);
+                            }
+                        }                        
+
+                        break;
+
                     // *** Catchall...
                     default:
                         // record this because it shouldn't be happening
@@ -487,8 +568,7 @@ namespace MTGServer
             }
             catch (ObjectDisposedException exo)
             {
-                //mmb - what to do here?
-                AddError("OnSendAndClose:  Unable to send message to the server. [" + exo.Message + "]");
+                AddError("OnSendAndClose:  Unable to send message to the server. ObjectDisposed.  [" + exo.Message + "]");
             }
             catch (Exception ex)
             {
