@@ -6,10 +6,10 @@ using System.Text;
 
 
 
-namespace MTGCommon
+namespace MTG
 {
     [Serializable]
-    class MTGCollection
+    public class MTGCollection
     {
         private ArrayList cards;
         public ArrayList Cards
@@ -23,6 +23,40 @@ namespace MTGCommon
         {
             get { return decks; }
             set { decks = value; }
+        }
+
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public MTGCollection()
+        {
+            cards = new ArrayList();
+            decks = new Dictionary<String, ArrayList>();
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public void Clear()
+        {
+            cards.Clear();
+            decks.Clear();
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="NewCollection"></param>
+        public void Add(MTGCollection NewCollection)
+        {
+            foreach (Int32 cardnumber in NewCollection.Cards)
+            {
+                Cards.Add(cardnumber);
+            }
+
+            //mmb - todo
+            // update decks too
         }
     }
 }

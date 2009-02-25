@@ -23,10 +23,11 @@ namespace MTGClient
     public partial class MTGClientForm : Form
     {
         // Debug vars
-        Boolean Debug = true;
+        Int32 Debug = 1;
 
         // Class vars
         Boolean Connected = false;
+        Boolean Receiving = false;
 
         // Network vars
         public Socket clientSocket; //The main client socket
@@ -38,7 +39,8 @@ namespace MTGClient
         private Int32 WaitingForData = 1;        
 
         // Card Sets
-        ArrayList CardSets;       
+        ArrayList CardSets;
+        MTGCollection Collection;
 
 
         /// <summary>
@@ -48,8 +50,11 @@ namespace MTGClient
         {
             InitializeComponent();
 
+            // init the collection data
+            Collection = new MTGCollection();
+
             // setup the collection data grid view
-            SetupDataGridView();
+            SetupDataGridView();            
 
             // Welcome the player
             UpdateStatusStrip("Welcome to Magic the Gathering Online!");
@@ -75,7 +80,7 @@ namespace MTGClient
             {
                 if (!ex.Message.StartsWith("Could not find file"))
                 {
-                    AddError(String.Format("  **ERROR: ", ex.Message));
+                    LogError(String.Format("  **ERROR: ", ex.Message));
                 }
             }
             
@@ -173,7 +178,7 @@ namespace MTGClient
 
                         //Send it to the server
                         clientSocket.BeginSend(ConvertedData, 0, ConvertedData.Length, SocketFlags.None, new AsyncCallback(OnSendAndWait), null);
-                        AddStatus("Client is sending a LOGIN message to server.");
+                        LogDebug("Client is sending a LOGIN message to server.");
 
                         UpdateStatusStrip("Logging on to the MTG Server...");
                     }
@@ -193,13 +198,12 @@ namespace MTGClient
                         MTGNetworkPacket packet = new MTGNetworkPacket();
 
                         packet.OpCode = MTGNetworkPacket.MTGOpCode.Logout;
-                        //packet.Data = null;
 
                         byte[] ConvertedData = packet.ToByte();
 
                         //Send it to the server
                         clientSocket.BeginSend(ConvertedData, 0, ConvertedData.Length, SocketFlags.None, new AsyncCallback(OnSendAndClose), null);
-                        AddStatus("Client is sending a LOGOUT message to server.");
+                        LogDebug("Client is sending a LOGOUT message to server.");
 
                         UpdateStatusStrip("Logging off the MTG Server...");
                     }
@@ -207,7 +211,7 @@ namespace MTGClient
             }
             catch (Exception ex)
             {
-                AddError("buttonLogin_Click:  Unable to send message to the server. [" + ex.Message + "]");
+                LogError("buttonLogin_Click:  Unable to send message to the server. [" + ex.Message + "]");
             }  
         }
 
@@ -233,7 +237,7 @@ namespace MTGClient
             }
             catch (Exception ex)
             {
-                AddError("ConnectToServer: [" + ex.Message + "]");
+                LogError("ConnectToServer: [" + ex.Message + "]");
                 Connecting = false;
             }
 
@@ -251,12 +255,12 @@ namespace MTGClient
                 clientSocket.EndConnect(ar);
 
                 //We are connected so we login into the server
-                Connected = true;                
-                AddStatus("Client is connected to server.");
+                Connected = true;
+                LogDebug("Client is connected to server.");
             }
             catch (Exception ex)
             {
-                AddError("OnConnect: [" + ex.Message + "]");
+                LogError("OnConnect: [" + ex.Message + "]");
             }
         }
 
@@ -268,7 +272,7 @@ namespace MTGClient
         {
             try
             {
-                AddStatus("Client has successfully sent a message to the server.");
+                LogDebug("Client has successfully sent a message to the server.");
 
                 // message was successfully sent
                 clientSocket.EndSend(ar);
@@ -277,18 +281,23 @@ namespace MTGClient
                 WaitingData = new byte[PacketSize];
                 WaitingForData = 1;
 
-                // now wait for a reply
-                byteData = new byte[PacketSize];
-                clientSocket.BeginReceive(byteData, 0, byteData.Length, SocketFlags.None, new AsyncCallback(OnReceive), null);
+                if (!Receiving)
+                {
+                    // now wait for a reply
+                    byteData = new byte[PacketSize];
+                    clientSocket.BeginReceive(byteData, 0, byteData.Length, SocketFlags.None, new AsyncCallback(OnReceive), null);
+
+                    Receiving = true;
+                }
 
             }
-            catch (ObjectDisposedException)
+            catch (ObjectDisposedException exo)
             { 
-                //mmb - what to do here?
+                LogError("OnSendAndWait:  Unable to send message to the server. ObjectDisposed. [" + exo.Message + "]");
             }
             catch (Exception ex)
             {
-                AddError("OnSendAndWait:  Unable to send message to the server. [" + ex.Message + "]");
+                LogError("OnSendAndWait:  Unable to send message to the server. [" + ex.Message + "]");
             }
         }
 
@@ -300,8 +309,8 @@ namespace MTGClient
         {
             try
             {
-                AddStatus("Client has successfully sent a message to the server.");
-                AddStatus("Client has logged out!");
+                LogDebug("Client has successfully sent a message to the server.");
+                LogDebug("Client has logged out!");
 
                 // message was successfully sent
                 clientSocket.EndSend(ar);
@@ -323,7 +332,7 @@ namespace MTGClient
             }
             catch (Exception ex)
             {
-                AddError("OnSendAndWait:  Unable to send message to the server. [" + ex.Message + "]");
+                LogError("OnSendAndWait:  Unable to send message to the server. [" + ex.Message + "]");
             }
         }
 
@@ -333,13 +342,16 @@ namespace MTGClient
         /// <param name="ar"></param>
         private void OnReceive(IAsyncResult ar)
         {
+            Int32 size = 0;
+
+
             try
             {
-                AddStatus("Client has received a message from the server.");
+                LogDebug("Client has received a message from the server.");
 
                 if (ar.IsCompleted)
                 {
-                    Int32 size = clientSocket.EndReceive(ar);
+                    size = clientSocket.EndReceive(ar);
 
 
                     if (size < PacketSize)
@@ -365,7 +377,7 @@ namespace MTGClient
                         {
                             case MTGNetworkPacket.MTGOpCode.Login:
                                 String result = packet.Data.ToString();
-                                AddStatus("Login: [" + result + "]");
+                                //AddStatus("Login: [" + result + "]");                                
 
                                 // was login successful?
                                 if (result != "0")
@@ -375,6 +387,7 @@ namespace MTGClient
                                     EnableUserTextBox(false);
                                     EnablePasswordTextBox(false);
 
+                                    LogInfo("Login successful!  Welcome to the MTG Server!");
                                     UpdateStatusStrip("Successfully Logged on to the MTG Server");
 
                                     EnableTabPages(true);
@@ -383,7 +396,6 @@ namespace MTGClient
                                 {
                                     // if not, then disconnect from server
                                     UpdateStatusStrip("Failed to Log on to the MTG Server");
-                                    AddStatus("Log on has failed!  Disconnecting from server now...");
 
                                     // message was successfully sent
                                     clientSocket.Close();
@@ -393,7 +405,7 @@ namespace MTGClient
                                     EnablePasswordTextBox(true);
 
                                     Connected = false;
-                                    AddStatus("Log on has failed!  Disconnected");
+                                    LogInfo("Log on has failed!  Disconnected");
                                 }
                                 break;
 
@@ -401,7 +413,7 @@ namespace MTGClient
 
                                 // mmb - this won't happen!
 
-                                AddStatus("Logout: [" + packet.Data.ToString() + "]");
+                                LogDebug("Logout: [" + packet.Data.ToString() + "]");
                                 UpdateStatusStrip("Successfully Logged off the MTG Server");
 
                                 EnableTabPages(false);
@@ -409,16 +421,23 @@ namespace MTGClient
                                 break;
 
                             case MTGNetworkPacket.MTGOpCode.PurchaseReceive:
-                                AddStatus("PurchaseReceive: [" + packet.Data.ToString() + "]");
-                                ArrayList List = (ArrayList)packet.Data;
+                                LogDebug("PurchaseReceive: [" + packet.Data.ToString() + "]");
+                                //ArrayList List = (ArrayList)packet.Data;
+                                MTGCollection NewCards = (MTGCollection)packet.Data;
                                 UpdateStatusStrip("New Foil of cards bought.");
-                                AddToCollection(List);
+                                AddToCollection(NewCards);
                                 UpdateStatusStrip("New Foil of cards added to collection.");
                                 break;
 
                             case MTGNetworkPacket.MTGOpCode.ReceiveCollection:
-                                AddStatus("ReceiveCollection: [" + packet.Data.ToString() + "]");
-                                // mmb - todo:
+                                LogDebug("ReceiveCollection: [" + packet.Data.ToString() + "]");
+                                Collection.Clear();
+                                Collection = (MTGCollection)packet.Data;
+                                UpdateStatusStrip("Player Collection has been received.");
+                                break;
+
+                            case MTGNetworkPacket.MTGOpCode.Chat:
+                                Log(packet.Data.ToString());
                                 break;
                         }
 
@@ -427,7 +446,7 @@ namespace MTGClient
                     else
                     {
                         // wait for more data?
-                        AddStatus("OnReceive:  Waiting for more data from server...");
+                        LogDebug("OnReceive:  Waiting for more data from server...");
                                                 
                         byte[] temp = new byte[PacketSize * WaitingForData];
                         WaitingData.CopyTo(temp, 0);
@@ -435,32 +454,75 @@ namespace MTGClient
                         WaitingData = new byte[PacketSize * WaitingForData];
                         WaitingData = temp;
                         WaitingForData++;
-
-                        // now wait for a reply
-                        byteData = new byte[PacketSize];
-                        clientSocket.BeginReceive(byteData, 0, byteData.Length, SocketFlags.None, new AsyncCallback(OnReceive), null);
                     }
                 }
             }
             catch (ObjectDisposedException exo)
-            {                 
-                AddError("OnReceive:  Unable to receive message to the server. [" + exo.Message + "]");
+            {
+                String Error = "OnReceive:  Unable to receive. ObjectDisposed. [" + exo.Message + "]";
+                //AddError(Error);
+                LogError("Connection to the server was terminated.");
             }
             catch (Exception ex)
             {
-                AddError("OnReceive:  Unable to receive message to the server. [" + ex.Message + "]");
+                LogError("OnReceive:  Unable to receive. [" + ex.Message + "]");
+            }
+
+            if (size != 0)
+            {
+                // now wait for a reply
+                byteData = new byte[PacketSize];
+                clientSocket.BeginReceive(byteData, 0, byteData.Length, SocketFlags.None, new AsyncCallback(OnReceive), null);
             }
         }
 
-        #region Status and Error Handling
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="NewCards"></param>
+        private void AddToCollection(MTGCollection NewCards)
+        {
+            Collection.Add(NewCards);
+            ArrayList Display = new ArrayList();
+            foreach (Int32 cardnumber in Collection.Cards)
+            {
+                MTGCard card = new MTGCard();                
+
+                foreach (MTGCard cardInfo in ((MTGCardSet)CardSets[0]).CardSet)
+                {
+                    if (cardInfo.ID == cardnumber)
+                    {
+                        card = cardInfo;
+                        Display.Add(card);
+                        break;
+                    }
+                }
+            }
+            UpdateCollection(Display);
+        }
+
+        #region Logging, Status and Error Handling
+
+        // there are 3 types of logging...
 
         /// <summary>
         /// 
         /// </summary>
         /// <param name="Message"></param>
-        void AddError(String Message)
+        void Log(String Message)
         {
-            if (Debug)
+            
+            AddToResults(Message);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="Type"></param>
+        /// <param name="Message"></param>
+        void Log(Int32 Type, String Message)
+        {
+            if (Debug >= Type)
             {
                 AddToResults(Message);
             }
@@ -470,9 +532,29 @@ namespace MTGClient
         /// 
         /// </summary>
         /// <param name="Message"></param>
-        void AddStatus(String Message)
+        void LogError(String Message)
         {
-            if (Debug)
+            if (Debug >= 1)
+            {
+                AddToResults(Message);
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="Message"></param>
+        void LogInfo(String Message)
+        {
+            if (Debug >= 2)
+            {
+                AddToResults(Message);
+            }
+        }
+
+        void LogDebug(String Message)
+        {
+            if (Debug >= 3)
             {
                 AddToResults(Message);
             }
@@ -510,7 +592,7 @@ namespace MTGClient
         delegate void EnablePasswordTextboxCallback(Boolean Enable);
         delegate void SetLoginButtonTextCallback(String Text);
         delegate void UpdateStatusStripCallback(String Text);
-        delegate void AddToCollectionCallback(ArrayList List);
+        delegate void UpdateCollectionCallback(ArrayList NewCards);
 
         public void EnableLoginButton(Boolean Enable)
         {
@@ -625,20 +707,20 @@ namespace MTGClient
             }
         }
 
-        public void AddToCollection(ArrayList List)
+        public void UpdateCollection(ArrayList NewCards)
         {
             // InvokeRequired required compares the thread ID of the
             // calling thread to the thread ID of the creating thread.
             // If these threads are different, it returns true.
             if (this.dataGridViewCollection.InvokeRequired)
             {
-                AddToCollectionCallback d = new AddToCollectionCallback(AddToCollection);
-                this.Invoke(d, new object[] { List });
+                UpdateCollectionCallback d = new UpdateCollectionCallback(UpdateCollection);
+                this.Invoke(d, new object[] { NewCards });
             }
             else
             {
                 // mmb - add to the current collection, don't overwrite
-                dataGridViewCollection.DataSource = List;
+                dataGridViewCollection.DataSource = NewCards;
                 UpdateGrid();
             }
         }
@@ -672,7 +754,7 @@ namespace MTGClient
                 //Send it to the server
                 clientSocket.BeginSend(ConvertedData, 0, ConvertedData.Length, SocketFlags.None, new AsyncCallback(OnSendAndWait), null);
                 
-                AddStatus("Client is sending a PURCHASE message to server.");
+                LogInfo("Client is sending a PURCHASE message to server.");
                 UpdateStatusStrip("Attempting to buy a foil of cards...");
             }
         }
@@ -696,6 +778,31 @@ namespace MTGClient
                     }
                 }
             }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void buttonChat_Click(object sender, EventArgs e)
+        {
+            // send some chat text to the server to be sent to all the online users
+            
+            //Fill the info for the message to be send
+            MTGNetworkPacket packet = new MTGNetworkPacket();
+            String data = String.Format(textBoxChat.Text);
+
+            packet.OpCode = MTGNetworkPacket.MTGOpCode.Chat;
+            packet.Data = data;
+
+            byte[] ConvertedData = packet.ToByte();
+
+            //Send it to the server
+            clientSocket.BeginSend(ConvertedData, 0, ConvertedData.Length, SocketFlags.None, new AsyncCallback(OnSendAndWait), null);
+            LogInfo("Client is sending a CHAT message to the server.");
+
+            UpdateStatusStrip("Logging off the MTG Server...");
         }
     }
 }

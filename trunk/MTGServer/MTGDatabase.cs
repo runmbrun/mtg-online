@@ -179,5 +179,20 @@ namespace MTG
 
             return Admin;
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="user"></param>
+        /// <returns></returns>
+        public MTGCollection GetPlayerCollection(String Player)
+        {
+            MTGCollection collection = new MTGCollection();
+
+
+            // mmb - todo
+
+            return collection;            
+        }
     }
 }
