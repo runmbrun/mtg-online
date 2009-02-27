@@ -549,7 +549,7 @@ namespace MTGServer
 
 //Set 	                    Set symbol 	            Set code     	Release date 	    Size    Common 	Uncommon 	Rare 	Basic Land 	Other
 //Core Set - Tenth Edition 	A Roman-numeral ten 	10E 	        July 14, 2007[13] 	383 	121 	121 	    121 	20 	        —
-            // Foil = 15 Cards.  1 Land, 1 Rare or Mythic Rare, 3 Uncommon, and 10 Common.
+            
 
 
             //Tenth Edition  features 383 cards, including randomly inserted premium versions of all cards in the set. 
@@ -568,6 +568,8 @@ namespace MTGServer
             // A strategy insert, and a random Pro Player card.
             // Theme deck includes:
             // Kamahl's Temper (Red), Arcanis's Guile (Blue), Molimo's Might (Green) , Evincar's Tyranny (Black), Cho-Manno's Resolve (White) Theme Decks
+
+            // Foil = 15 Cards.  1 Land, 1 Rare or Mythic Rare, 3 Uncommon, and 10 Common.
 
             /*
              * 	
@@ -602,14 +604,109 @@ Core Set - Tenth Edition Theme Deck
 * = from a previous set
              * */
 
-            // mmb - testing for now
-            Collection.Cards.Add(129559);
-            Collection.Cards.Add(129459);
-            Collection.Cards.Add(129495);
 
-            // Add these purchases to the player's current collection
+            try
+            {
+                // Edition:TypeOfPurchase:Quantity
+                Int32 FirstColon = Purchase.IndexOf(":");
+                Int32 SecondColon = Purchase.IndexOf(":", FirstColon + 1);
+                String Edition = Purchase.Substring(0, FirstColon);
+                String TypeOfPurchase = Purchase.Substring(FirstColon + 1, SecondColon - FirstColon - 1);
+                Int32 Quantity = Convert.ToInt32(Purchase.Substring(SecondColon + 1));
 
-            // if this is a preconstructed theme deck, then add it to the decks too
+                // mmb - don't do anything about the Edition right now... Will always be 10E
+
+                // loop for the quantity
+                for (Int32 i = 0; i < Quantity; i++)
+                {
+                    // 
+                    switch (TypeOfPurchase)
+                    {
+                        case "FOIL":
+
+                            // Foil = 15 Cards.  1 Land, 1 Rare or Mythic Rare, 3 Uncommon, and 10 Common.
+
+                            // mmb - make cards picks random!
+
+                            // mmb - but for current testing use these...
+
+                            // land x 1
+                            Collection.Cards.Add(129559);
+
+                            // commons x 10
+                            Collection.Cards.Add(130522);
+                            Collection.Cards.Add(135185);
+                            Collection.Cards.Add(130985);
+                            Collection.Cards.Add(132106);
+                            Collection.Cards.Add(135194);
+                            Collection.Cards.Add(129671);
+                            Collection.Cards.Add(134758);
+                            Collection.Cards.Add(135216);
+                            Collection.Cards.Add(129579);
+                            Collection.Cards.Add(129533);
+
+                            // uncommon x 3
+                            Collection.Cards.Add(135267);
+                            Collection.Cards.Add(129459);
+                            Collection.Cards.Add(129495);
+
+                            // rare x 1
+                            Collection.Cards.Add(106426);
+
+                            break;
+                        case "KAMAHLSTEMPER":
+
+                            // Kamahl's Temper Red Theme Deck for 10th Edition
+
+                            // lands x 17
+                            for (i = 0; i < 17; i++)
+                            {
+                                Collection.Cards.Add(129650);
+                            }
+
+                            // commons x 14
+                            Collection.Cards.Add(129688);
+                            Collection.Cards.Add(130387);
+                            Collection.Cards.Add(130384);
+                            Collection.Cards.Add(130384);
+                            Collection.Cards.Add(130534);
+                            Collection.Cards.Add(130534);
+                            Collection.Cards.Add(134752);
+                            Collection.Cards.Add(129624);
+                            Collection.Cards.Add(129624);
+                            Collection.Cards.Add(129624);
+                            Collection.Cards.Add(134751);
+                            Collection.Cards.Add(134751);
+                            Collection.Cards.Add(136509);
+                            Collection.Cards.Add(136509);
+
+                            // uncommon x 7
+                            Collection.Cards.Add(130386);
+                            Collection.Cards.Add(130381);
+                            Collection.Cards.Add(130381);
+                            Collection.Cards.Add(129767);
+                            Collection.Cards.Add(129484);
+                            Collection.Cards.Add(129527);
+                            Collection.Cards.Add(135281);
+
+                            // rare x 2
+                            Collection.Cards.Add(106398);
+                            Collection.Cards.Add(135262);
+
+                            break;
+                    }
+                }
+
+                // Add these purchases to the player's current collection
+                // mmb - todo
+
+                // if this is a preconstructed theme deck, then add it to the decks too
+                // mmb - todo
+            }
+            catch (Exception ex)
+            {
+                AddError(String.Format("DeterminePurchases: {0}", ex.Message));
+            }
 
             // send back the players newly updated collection
             return Collection;

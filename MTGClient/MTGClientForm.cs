@@ -330,6 +330,7 @@ namespace MTGClient
                 EnableTabPages(false);
 
                 Connected = false;
+                Receiving = false;
 
                 UpdateStatusStrip("Successfully Logged off the MTG Server");
             }
@@ -430,6 +431,7 @@ namespace MTGClient
                                 UpdateStatusStrip("Successfully Logged off the MTG Server");
 
                                 EnableTabPages(false);
+                                Receiving = true;
 
                                 break;
 
@@ -777,17 +779,16 @@ namespace MTGClient
         /// <param name="e"></param>
         private void buttonBuy_Click(object sender, EventArgs e)
         {
-            //dataGridViewcollection
-
             if (!Connected)
             {
                 // error!
+                LogError("Not connected to the server.  Please login again.");
             }
             else
             {
                 //Fill the info for the message to be send
                 MTGNetworkPacket packet = new MTGNetworkPacket();
-                String data = "1";
+                String data = "10E:FOIL:1";
 
                 packet.OpCode = MTGNetworkPacket.MTGOpCode.Purchase;
                 packet.Data = data;
@@ -878,6 +879,37 @@ namespace MTGClient
                     e.Handled = true;
                     SendChatMessage();
                 }
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void buttonBuyThemeDecks_Click(object sender, EventArgs e)
+        {
+            if (!Connected)
+            {
+                // error!
+                LogError("Not connected to the server.  Please login again.");
+            }
+            else
+            {
+                //Fill the info for the message to be send
+                MTGNetworkPacket packet = new MTGNetworkPacket();
+                String data = "10E:KAMAHLSTEMPER:1";
+
+                packet.OpCode = MTGNetworkPacket.MTGOpCode.Purchase;
+                packet.Data = data;
+
+                byte[] ConvertedData = packet.ToByte();
+
+                //Send it to the server
+                clientSocket.BeginSend(ConvertedData, 0, ConvertedData.Length, SocketFlags.None, new AsyncCallback(OnSendAndWait), null);
+
+                LogInfo("Client is sending a PURCHASE message to server.");
+                UpdateStatusStrip("Attempting to buy a foil of cards...");
             }
         }
     }

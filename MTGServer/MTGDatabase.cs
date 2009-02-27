@@ -11,7 +11,7 @@ namespace MTG
     class MTGDatabase
     {   
         #region Database Vars
-        private String server = "192.168.1.119";
+        private String server = "127.0.0.1";
         private String user = "sa";
         private String password = "Password01";
         private String name = "mtg";
