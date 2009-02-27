@@ -692,7 +692,7 @@ Core Set - Tenth Edition Theme Deck
                             // rare x 2
                             Collection.Cards.Add(106398);
                             Collection.Cards.Add(135262);
-
+                                                        
                             break;
                     }
                 }
@@ -701,7 +701,10 @@ Core Set - Tenth Edition Theme Deck
                 // mmb - todo
 
                 // if this is a preconstructed theme deck, then add it to the decks too
-                // mmb - todo
+                if (TypeOfPurchase == "KAMAHLSTEMPER")
+                {
+                    Collection.Decks.Add("Kamahl's Temper", Collection.Cards);
+                }
             }
             catch (Exception ex)
             {
