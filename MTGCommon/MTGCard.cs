@@ -22,6 +22,9 @@ namespace MTG
         private Image _pic;
         private String _rarity;
         private String _flavor;
+        private Int32 _quantity;
+        private String _number;
+        private Int32 _sortby;
 
 
         public MTGCard()
@@ -36,6 +39,9 @@ namespace MTG
             _picLocation = "";
             _rarity = "";
             _pic = null;
+            _quantity = 0;
+            _number = "0";
+            _sortby = 0;
         }
 
         public MTGCard(Int32 id, String name, String cost, String type, String power, String toughness, String text, String piclocation)
@@ -49,6 +55,9 @@ namespace MTG
             _text = text;
             _picLocation = piclocation;
             _pic = null;
+            _quantity = 0;
+            _number = "0";
+            _sortby = 0;
         }
 
         // 0
@@ -117,6 +126,18 @@ namespace MTG
             get { return this._flavor; }
             set { this._flavor = value; }
         }
+        // 11
+        public Int32 Quantity
+        {
+            get { return this._quantity; }
+            set { this._quantity = value; }
+        }
+        // 12
+        public String Number
+        {
+            get { return this._number; }
+            set { this._number = value; }
+        }
 
         /// <summary>
         /// 
@@ -128,7 +149,27 @@ namespace MTG
             if (obj is MTGCard)
             {
                 MTGCard otherRowInformation = (MTGCard)obj;
-                return Convert.ToInt32(this._id).CompareTo(Convert.ToInt32(otherRowInformation._id));
+                
+                switch (_sortby)
+                {
+                    case 0:
+                        return Convert.ToInt32(this._id).CompareTo(Convert.ToInt32(otherRowInformation._id));
+                    case 1:
+                        return this._name.CompareTo(otherRowInformation._name);
+                    case 2:
+                        return this._cost.CompareTo(otherRowInformation._cost);
+                    case 3:
+                        return this._type.CompareTo(otherRowInformation._type);
+                    case 4:
+                        return this._power.CompareTo(otherRowInformation._power);
+                    case 11:
+                        return Convert.ToInt32(this._quantity).CompareTo(Convert.ToInt32(otherRowInformation._quantity));
+                    case 12:
+                        return Convert.ToInt32(this._number).CompareTo(Convert.ToInt32(otherRowInformation._number));
+                    default:
+                        // if not found or defined, then sort by name
+                        return this._name.CompareTo(otherRowInformation._name);
+                }
             }
             else
             {
@@ -136,5 +177,13 @@ namespace MTG
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="ColumnToSort"></param>
+        public void SetSorting(Int32 ColumnToSort)
+        {
+            _sortby = ColumnToSort;
+        }
     }
 }

@@ -12,28 +12,39 @@ namespace MTG
         private DateTime LastFetched;
         public ArrayList CardSet = null;
 
+
+        /// <summary>
+        /// 
+        /// </summary>
         public MTGCardSet()
         {
             CardSet = new ArrayList();
         }
 
-        /* mmb - can I do this anymore?
-        public void Add(String[] Row)
-        {
-            MTGCard row = new MTGCard();
-            row.ID = Row[0];
-            row.Name = Row[1];
-            row.Cost = Row[2];
-            // ...
-            CardSet.Add(row);
-            LastFetched = DateTime.Now;
-        }
-         * */
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="Row"></param>
         public void Add(MTGCard Row)
         {
             CardSet.Add(Row);
             LastFetched = DateTime.Now;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="Column"></param>
+        public void Sort(Int32 Column)
+        {
+            // sort each card's sorting field
+            foreach (MTGCard card in CardSet)
+            {
+                card.SetSorting(Column);
+            }
+
+            // now resort the array with the new sorting field
+            CardSet.Sort();
         }
     }
 }

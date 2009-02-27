@@ -102,7 +102,7 @@ namespace MTGDataGatherer
             comboBoxFetchMTGEdition.Items.Add(MTGEditions.FourthE.ToString());
             comboBoxFetchMTGEdition.Items.Add(MTGEditions.FifthE.ToString());
             comboBoxFetchMTGEdition.Items.Add(MTGEditions.TenthE.ToString());
-            comboBoxFetchMTGEdition.SelectedIndex = 0; // mmb - debugging only
+            comboBoxFetchMTGEdition.SelectedIndex = 2; // mmb - debugging only
 
             // Create a background worker thread that fetches data from the web site asnyc'ly and Reports Progress and Supports Cancellation            
             FetchAsyncWorker.WorkerReportsProgress = true;
@@ -487,7 +487,6 @@ namespace MTGDataGatherer
             {
                 if (!ex.Message.StartsWith("Could not find file"))
                 {
-                    //Log(String.Format("  **ERROR: ", ex.Message));
                     MessageBox.Show(String.Format("  **ERROR[LoadTempData]: {0}", ex.Message));
                 }
             }
@@ -534,7 +533,6 @@ namespace MTGDataGatherer
                 {
                     if (!ex.Message.StartsWith("Could not find file"))
                     {
-                        //Log(String.Format("  **ERROR: ", ex.Message));
                         MessageBox.Show(String.Format("  **ERROR[LoadTempData]: {0}", ex.Message));
                     }
                 }
@@ -572,6 +570,24 @@ namespace MTGDataGatherer
                     String Error = String.Format("{0}", ex.Message);
                 }
             }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void dataGridViewResults_ColumnHeaderMouseClick(object sender, DataGridViewCellMouseEventArgs e)
+        {
+            this.Cursor = Cursors.WaitCursor;
+
+            // sort by column header
+            TempSet.Sort(e.ColumnIndex);
+
+            dataGridViewResults.DataSource = TempSet.CardSet;
+            UpdateGrid();
+            
+            this.Cursor = Cursors.Default;
         }
     }
 }

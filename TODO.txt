@@ -55,3 +55,7 @@ Database
 - clean up!
 
 
+DataGatherer
+- Pull all the TenthE info better.  Get all 4 Land cards
+- Get and store mana
+

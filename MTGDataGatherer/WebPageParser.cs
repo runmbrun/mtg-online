@@ -95,39 +95,61 @@ namespace MTGDataGatherer
         private static ArrayList ParseData(String strResponse, String Edition)
         {
             ArrayList Results = new ArrayList();
-            Int32 iStart = 0;
-            Int32 iNext = 0;
-
-
+            Int32 Start = 0;
+            Int32 End = 0;
+            Int32 Next = 0;
+            Int32 Last = 0;
+            Int32 CardID = 0;
             // here are a list of the lines to parse out to get the proper data
-            String strFindFirst = "<tr onmouseover=\"this.style.backgroundColor=";
-            String strFindNext = "<td align=\"left\" valign=\"top\" onclick=\"javascript:openDetailsWindow(";
+            String FindCardBegin = "<tr onmouseover=\"this.style.backgroundColor=";
+            String FindCardEnd = "</tr>";
+            String FindEdition = "<a href=\"javascript:void(0);\" onclick=\"javascript:window.open('CardDetails.aspx?id=";
                       
             
             try
             {
-                // loop and pull out each rank
-                while ((iStart = (strResponse.IndexOf(strFindFirst, iStart) + strFindFirst.Length)) > strFindFirst.Length)
+                // first clean out the Edition's html space value
+                Edition = Edition.Replace("%20", " ");
+
+                // get the start of this card's html section
+                while ((Start = strResponse.IndexOf(FindCardBegin, Start + 1)) > -1)
                 {
-                    Int32 ID = 0;
+                    if (Start > -1)
+                    {                        
+                        // get the end of this card's html section
+                        End = strResponse.IndexOf(FindCardEnd, Start) + FindCardEnd.Length;
 
-                    // Parse the ID of the card
-                    iStart = strResponse.IndexOf(strFindNext, iStart) + strFindNext.Length;
-                    iNext = strResponse.IndexOf(")", iStart) - iStart;
-                    ID = Convert.ToInt32(strResponse.Substring(iStart, iNext));
+                        if (End > -1)
+                        {
+                            // store this card's html section for easier searching
+                            String CardSection = strResponse.Substring(Start, End - Start);
+                            
+                            // Init the cycle
+                            Next = 0;
+                            Last = 0;
+                            CardID = 0;
 
-                    // now add to the results text box
-                    Results.Add(ID);
-
-                    // update start column
-                    iStart = iStart + iNext + 1;
+                            // cycle through all the different editions of this card
+                            while ((Next = CardSection.IndexOf(FindEdition, Next + 1)) > -1)
+                            {
+                                Int32 test = CardSection.IndexOf(Edition, Last, Next - Last);
+                                if (test > -1)
+                                {
+                                    // this is the edition!
+                                    Int32 IDBegin = Last + FindEdition.Length;
+                                    Int32 IDLength = CardSection.IndexOf('\'', IDBegin) - IDBegin;
+                                    CardID = Convert.ToInt32(CardSection.Substring(IDBegin, IDLength));
+                                    Results.Add(CardID);
+                                }
+                                Last = Next;
+                            }
+                        }
+                    }
                 }
             }
             catch (Exception ex)
             {
                 String Error = String.Format("ERROR: ", ex.Message);
-                //Log(String.Format("  **ERROR: ", ex.Message));
-                //MessageBox.Show(String.Format("  **ERROR[ParseData]: {0}", ex.Message));
             }
 
             return Results;             
@@ -138,13 +160,51 @@ namespace MTGDataGatherer
         /// </summary>
         /// <param name="p"></param>
         /// <returns></returns>
-        private static string ParseCost(String Cost)
+        private static string ParseCost(String CostSection)
         {
-            String SimplifiedCost = "? Mana";
+            String Cost = "";
+            String ManaMarker = "alt='";
+            String Mana = "";
+            Int32 Next = -1;
 
-            // mmb - do this!
+            // example:
+            //<span id="_lblCost"><img src='http://resources.wizards.com/magic/images/symbols/Symbol_2_mana.gif' alt='2 Mana' border='0'/><img src='http://resources.wizards.com/magic/images/symbols/green_mana.gif' width='12' height='12' alt='Green Mana' border='0'/><img src='http://resources.wizards.com/magic/images/symbols/green_mana.gif' width='12' height='12' alt='Green Mana' border='0'/></span>
+            // search for "alt='"
+            
+            
+            // cycle through all the different editions of this card
+            while ((Next = CostSection.IndexOf(ManaMarker, Next + 1)) > -1)
+            {
+                // this is the edition!
+                Int32 IDBegin = Next + ManaMarker.Length;
+                Int32 IDLength = CostSection.IndexOf("'", IDBegin) - IDBegin;
+                Mana = CostSection.Substring(IDBegin, IDLength);
 
-            return SimplifiedCost;
+                switch (Mana)
+                {
+                    case "Green Mana":
+                        Cost += "G";
+                        break;
+                    case "Red Mana":
+                        Cost += "R";
+                        break;
+                    case "Black Mana":
+                        Cost += "B";
+                        break;
+                    case "Blue Mana":
+                        Cost += "U";
+                        break;
+                    case "White Mana":
+                        Cost += "W";
+                        break;
+                    default:
+                        // this is uncolor mana, just store as a number
+                        Cost += Mana.Substring(0, Mana.IndexOf(" "));
+                        break;
+                }
+            }
+
+            return Cost;
         }
 
         /// <summary>
@@ -234,7 +294,8 @@ namespace MTGDataGatherer
             String strFindType = "<span id=\"_lblCardType\">";                  //<span id="_lblCardType">Creature - Horror</span>
             String strFindPowerToughness = "<span id=\"_lblPowerToughness\">";  //<span id="_lblPowerToughness">2/6</span>
             String strFindText = "<span id=\"_lblRulesText\">";                 //<span id="_lblRulesText">...</span>
-            String strFindFlavorText = "<span id=\"lblFlavorText\">";         //<span id="_lblFlavorText"></span>
+            String strFindFlavorText = "<span id=\"_lblFlavorText\">";         //<span id="_lblFlavorText"></span>
+            String strFindCardNumber = "<span id=\"_lblCardNumber\">";         //<span id="_lblCardNumber">311</span>
 
 
             try
@@ -295,6 +356,11 @@ namespace MTGDataGatherer
                 iStart = (strResponse.IndexOf(strFindFlavorText, iStart) + strFindFlavorText.Length);
                 iNext = strResponse.IndexOf("<", iStart) - iStart;
                 Card.Flavor = strResponse.Substring(iStart, iNext);
+
+                // Card Number
+                iStart = (strResponse.IndexOf(strFindCardNumber, iStart) + strFindCardNumber.Length);
+                iNext = strResponse.IndexOf("<", iStart) - iStart;
+                Card.Number = strResponse.Substring(iStart, iNext);
 
                 // now download the picture of the card
                 Card.Pic = DownloadPicture(Card.PicLocation);
