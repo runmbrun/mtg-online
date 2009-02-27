@@ -47,10 +47,10 @@
             this.dataGridViewCollection = new System.Windows.Forms.DataGridView();
             this.tabPageStore = new System.Windows.Forms.TabPage();
             this.comboBox1 = new System.Windows.Forms.ComboBox();
-            this.button1 = new System.Windows.Forms.Button();
+            this.buttonBuyThemeDecks = new System.Windows.Forms.Button();
             this.label7 = new System.Windows.Forms.Label();
             this.label6 = new System.Windows.Forms.Label();
-            this.buttonBuy = new System.Windows.Forms.Button();
+            this.buttonBuyFoils = new System.Windows.Forms.Button();
             this.tabPageLobby = new System.Windows.Forms.TabPage();
             this.label5 = new System.Windows.Forms.Label();
             this.buttonChat = new System.Windows.Forms.Button();
@@ -243,10 +243,10 @@
             // tabPageStore
             // 
             this.tabPageStore.Controls.Add(this.comboBox1);
-            this.tabPageStore.Controls.Add(this.button1);
+            this.tabPageStore.Controls.Add(this.buttonBuyThemeDecks);
             this.tabPageStore.Controls.Add(this.label7);
             this.tabPageStore.Controls.Add(this.label6);
-            this.tabPageStore.Controls.Add(this.buttonBuy);
+            this.tabPageStore.Controls.Add(this.buttonBuyFoils);
             this.tabPageStore.Location = new System.Drawing.Point(4, 22);
             this.tabPageStore.Name = "tabPageStore";
             this.tabPageStore.Padding = new System.Windows.Forms.Padding(3);
@@ -263,14 +263,15 @@
             this.comboBox1.Size = new System.Drawing.Size(121, 21);
             this.comboBox1.TabIndex = 3;
             // 
-            // button1
+            // buttonBuyThemeDecks
             // 
-            this.button1.Location = new System.Drawing.Point(205, 134);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(75, 23);
-            this.button1.TabIndex = 2;
-            this.button1.Text = "Buy";
-            this.button1.UseVisualStyleBackColor = true;
+            this.buttonBuyThemeDecks.Location = new System.Drawing.Point(205, 134);
+            this.buttonBuyThemeDecks.Name = "buttonBuyThemeDecks";
+            this.buttonBuyThemeDecks.Size = new System.Drawing.Size(75, 23);
+            this.buttonBuyThemeDecks.TabIndex = 2;
+            this.buttonBuyThemeDecks.Text = "Buy";
+            this.buttonBuyThemeDecks.UseVisualStyleBackColor = true;
+            this.buttonBuyThemeDecks.Click += new System.EventHandler(this.buttonBuyThemeDecks_Click);
             // 
             // label7
             // 
@@ -290,15 +291,15 @@
             this.label6.TabIndex = 1;
             this.label6.Text = "Foil Packs";
             // 
-            // buttonBuy
+            // buttonBuyFoils
             // 
-            this.buttonBuy.Location = new System.Drawing.Point(62, 94);
-            this.buttonBuy.Name = "buttonBuy";
-            this.buttonBuy.Size = new System.Drawing.Size(75, 23);
-            this.buttonBuy.TabIndex = 0;
-            this.buttonBuy.Text = "Buy";
-            this.buttonBuy.UseVisualStyleBackColor = true;
-            this.buttonBuy.Click += new System.EventHandler(this.buttonBuy_Click);
+            this.buttonBuyFoils.Location = new System.Drawing.Point(62, 94);
+            this.buttonBuyFoils.Name = "buttonBuyFoils";
+            this.buttonBuyFoils.Size = new System.Drawing.Size(75, 23);
+            this.buttonBuyFoils.TabIndex = 0;
+            this.buttonBuyFoils.Text = "Buy";
+            this.buttonBuyFoils.UseVisualStyleBackColor = true;
+            this.buttonBuyFoils.Click += new System.EventHandler(this.buttonBuy_Click);
             // 
             // tabPageLobby
             // 
@@ -383,7 +384,7 @@
             // toolStripStatusLabel1
             // 
             this.toolStripStatusLabel1.Name = "toolStripStatusLabel1";
-            this.toolStripStatusLabel1.Size = new System.Drawing.Size(118, 17);
+            this.toolStripStatusLabel1.Size = new System.Drawing.Size(109, 17);
             this.toolStripStatusLabel1.Text = "toolStripStatusLabel1";
             // 
             // notifyIcon1
@@ -444,14 +445,14 @@
         private System.Windows.Forms.TabPage tabPageRegisteredUser;
         private System.Windows.Forms.TabPage tabPageNewUser;
         private System.Windows.Forms.ListBox listBoxResults;
-        private System.Windows.Forms.Button buttonBuy;
+        private System.Windows.Forms.Button buttonBuyFoils;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel1;
         private System.Windows.Forms.PictureBox pictureBoxCardImage;
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.Button buttonChat;
         private System.Windows.Forms.TextBox textBoxChat;
         private System.Windows.Forms.ComboBox comboBox1;
-        private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.Button buttonBuyThemeDecks;
         private System.Windows.Forms.Label label7;
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.TabPage tabPageGame;

@@ -1,0 +1,57 @@
+Here is a TODO list:
+(in no order)
+
+
+
+Client Logon Screen:
+- Better Login failed messages.
+	- because incorrect user or password
+	- because server not available
+- Display player stats when logon
+- Change password function
+
+
+Client Collection Screen:
+- Have Server send Collection/Decks right away after logon
+- Collection needs to display card's text if that card is selected
+- Deck Creation and Updating
+
+
+Client Store Screen:
+- Clean up and make more usable.  Organize with group boxes
+- Tab system for different editions???
+- Add the rest of the Theme Decks 
+- Add Fat Packs
+- Add Quantity Dropdown boxes for each buy button
+
+
+Client Lobby Screen:
+- Display a listbox of all the conversations 
+- listbox of other users
+- Combobox of players decks
+- Solitare button for solitaire game
+- Challenge button to play other players
+
+
+Client Game Screen:
+- Create the playing field
+- Implement a solitare game
+	- Can play cards, need to use mana
+	- Steps of a game turn are displayed 
+
+
+Client Admin Screen:
+- Create new user
+- Reset users password
+
+
+Server
+- reads db config info from a file that can be changed
+- logs info into a file that can be read while server is running
+
+
+Database
+- Add more data!
+- clean up!
+
+
