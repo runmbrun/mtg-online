@@ -9,12 +9,16 @@ using System.Data.SqlClient;
 namespace MTG
 {
     class MTGDatabase
-    {
-        SqlConnection sqlConn;
-        private String server = "localhost";
+    {   
+        #region Database Vars
+        private String server = "192.168.1.119";
         private String user = "sa";
         private String password = "Password01";
         private String name = "mtg";
+        #endregion
+
+        #region Vars
+        SqlConnection sqlConn;
         private String connectionstring;
                 
         private Boolean connected = false;
@@ -28,6 +32,7 @@ namespace MTG
         {
             get { return errorstring; }
         }
+        #endregion
 
 
 
@@ -108,7 +113,7 @@ namespace MTG
             {
                 // create the command object
                 sqlComm = new SqlCommand(sql, sqlConn);
-                //Count = sqlComm.ExecuteScalar(); //mmb - this fails right now... why?
+                //Count = sqlComm.ExecuteScalar(); //mmb - this fails right now... why?  Or is it needed?
 
                 SqlDataReader r = sqlComm.ExecuteReader();
                 while (r.Read())

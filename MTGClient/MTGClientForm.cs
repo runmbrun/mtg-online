@@ -41,6 +41,7 @@ namespace MTGClient
         // Card Sets
         ArrayList CardSets;
         MTGCollection Collection;
+        Boolean Admin;
 
 
         /// <summary>
@@ -80,11 +81,17 @@ namespace MTGClient
             {
                 if (!ex.Message.StartsWith("Could not find file"))
                 {
-                    LogError(String.Format("  **ERROR: ", ex.Message));
+                    LogError(String.Format("Init: ", ex.Message));
+                }
+                else
+                {
+                    LogError("Cannot find the cards data pack.");
                 }
             }
             
             WaitingData = new byte[PacketSize];
+
+            Admin = false;
         }
 
         #region DataGridVew Functions
@@ -390,6 +397,12 @@ namespace MTGClient
                                     LogInfo("Login successful!  Welcome to the MTG Server!");
                                     UpdateStatusStrip("Successfully Logged on to the MTG Server");
 
+                                    // check to see if this user is an admin
+                                    if (result == "2")
+                                    {
+                                        Admin = true;
+                                    }
+
                                     EnableTabPages(true);
                                 }
                                 else
@@ -468,11 +481,18 @@ namespace MTGClient
                 LogError("OnReceive:  Unable to receive. [" + ex.Message + "]");
             }
 
-            if (size != 0)
+            if (size != 0 && Connected)
             {
                 // now wait for a reply
-                byteData = new byte[PacketSize];
-                clientSocket.BeginReceive(byteData, 0, byteData.Length, SocketFlags.None, new AsyncCallback(OnReceive), null);
+                try
+                {
+                    byteData = new byte[PacketSize];
+                    clientSocket.BeginReceive(byteData, 0, byteData.Length, SocketFlags.None, new AsyncCallback(OnReceive), null);
+                }
+                catch (Exception ex)
+                {
+                    LogError("OnReceive:  Unable to begin to receive. [" + ex.Message + "]");
+                }
             }
         }
 
@@ -482,23 +502,34 @@ namespace MTGClient
         /// <param name="NewCards"></param>
         private void AddToCollection(MTGCollection NewCards)
         {
-            Collection.Add(NewCards);
-            ArrayList Display = new ArrayList();
-            foreach (Int32 cardnumber in Collection.Cards)
+            try
             {
-                MTGCard card = new MTGCard();                
+                ArrayList Display = new ArrayList();
 
-                foreach (MTGCard cardInfo in ((MTGCardSet)CardSets[0]).CardSet)
+
+                Collection.Add(NewCards);            
+                
+                foreach (Int32 cardnumber in Collection.Cards)
                 {
-                    if (cardInfo.ID == cardnumber)
+                    MTGCard card = new MTGCard();
+                
+                    foreach (MTGCard cardInfo in ((MTGCardSet)CardSets[0]).CardSet)
                     {
-                        card = cardInfo;
-                        Display.Add(card);
-                        break;
+                        if (cardInfo.ID == cardnumber)
+                        {
+                            card = cardInfo;
+                            Display.Add(card);
+                            break;
+                        }
                     }
                 }
+            
+                UpdateCollection(Display);
             }
-            UpdateCollection(Display);
+            catch (Exception ex)
+            {
+                LogError("AddToCollection:  Unable to add cards to collection. [" + ex.Message + "]");
+            }
         }
 
         #region Logging, Status and Error Handling
@@ -629,12 +660,24 @@ namespace MTGClient
                     tabControl1.TabPages.Add(tabPageCollection);
                     tabControl1.TabPages.Add(tabPageStore);
                     tabControl1.TabPages.Add(tabPageLobby);
+                    tabControl1.TabPages.Add(tabPageGame);
+
+                    if (this.Admin)
+                    {
+                        tabControl1.TabPages.Add(tabPageAdmin);
+                    }
                 }
                 else
                 {
                     tabControl1.TabPages.Remove(tabPageCollection);
                     tabControl1.TabPages.Remove(tabPageStore);
                     tabControl1.TabPages.Remove(tabPageLobby);
+                    tabControl1.TabPages.Remove(tabPageGame);
+
+                    //if (this.Admin)
+                    {
+                        tabControl1.TabPages.Remove(tabPageAdmin);
+                    }
                 }
             }            
         }
@@ -787,22 +830,55 @@ namespace MTGClient
         /// <param name="e"></param>
         private void buttonChat_Click(object sender, EventArgs e)
         {
+            SendChatMessage();
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        private void SendChatMessage()
+        {
             // send some chat text to the server to be sent to all the online users
-            
-            //Fill the info for the message to be send
-            MTGNetworkPacket packet = new MTGNetworkPacket();
             String data = String.Format(textBoxChat.Text);
 
-            packet.OpCode = MTGNetworkPacket.MTGOpCode.Chat;
-            packet.Data = data;
+            if (data != "")
+            {
+                //Fill the info for the message to be send
+                MTGNetworkPacket packet = new MTGNetworkPacket();
 
-            byte[] ConvertedData = packet.ToByte();
 
-            //Send it to the server
-            clientSocket.BeginSend(ConvertedData, 0, ConvertedData.Length, SocketFlags.None, new AsyncCallback(OnSendAndWait), null);
-            LogInfo("Client is sending a CHAT message to the server.");
+                packet.OpCode = MTGNetworkPacket.MTGOpCode.Chat;
+                packet.Data = data;
 
-            UpdateStatusStrip("Logging off the MTG Server...");
+                byte[] ConvertedData = packet.ToByte();
+
+                //Send it to the server
+                clientSocket.BeginSend(ConvertedData, 0, ConvertedData.Length, SocketFlags.None, new AsyncCallback(OnSendAndWait), null);
+                LogInfo("Client is sending a CHAT message to the server.");
+
+                // now clear the chat text
+                textBoxChat.Text = "";
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void tabControl1_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            TabControl test = (TabControl)sender;
+            if (test.SelectedTab == tabPageLobby)
+            {
+                // If the ENTER key is pressed, the Handled property is set to true, 
+                // to indicate the event is handled.
+                if (e.KeyChar == (char)Keys.Return)
+                {
+                    e.Handled = true;
+                    SendChatMessage();
+                }
+            }
         }
     }
 }

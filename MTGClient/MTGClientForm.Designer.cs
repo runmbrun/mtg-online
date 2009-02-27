@@ -46,15 +46,21 @@
             this.dataGridViewDeck = new System.Windows.Forms.DataGridView();
             this.dataGridViewCollection = new System.Windows.Forms.DataGridView();
             this.tabPageStore = new System.Windows.Forms.TabPage();
+            this.comboBox1 = new System.Windows.Forms.ComboBox();
+            this.button1 = new System.Windows.Forms.Button();
+            this.label7 = new System.Windows.Forms.Label();
+            this.label6 = new System.Windows.Forms.Label();
             this.buttonBuy = new System.Windows.Forms.Button();
             this.tabPageLobby = new System.Windows.Forms.TabPage();
+            this.label5 = new System.Windows.Forms.Label();
+            this.buttonChat = new System.Windows.Forms.Button();
+            this.textBoxChat = new System.Windows.Forms.TextBox();
+            this.tabPageGame = new System.Windows.Forms.TabPage();
+            this.tabPageAdmin = new System.Windows.Forms.TabPage();
             this.listBoxResults = new System.Windows.Forms.ListBox();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
             this.notifyIcon1 = new System.Windows.Forms.NotifyIcon(this.components);
-            this.textBoxChat = new System.Windows.Forms.TextBox();
-            this.buttonChat = new System.Windows.Forms.Button();
-            this.label5 = new System.Windows.Forms.Label();
             this.tabControl1.SuspendLayout();
             this.tabPageLogin.SuspendLayout();
             this.tabControl2.SuspendLayout();
@@ -70,15 +76,20 @@
             // 
             // tabControl1
             // 
+            this.tabControl1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
             this.tabControl1.Controls.Add(this.tabPageLogin);
             this.tabControl1.Controls.Add(this.tabPageCollection);
             this.tabControl1.Controls.Add(this.tabPageStore);
             this.tabControl1.Controls.Add(this.tabPageLobby);
-            this.tabControl1.Location = new System.Drawing.Point(12, 12);
+            this.tabControl1.Controls.Add(this.tabPageGame);
+            this.tabControl1.Controls.Add(this.tabPageAdmin);
+            this.tabControl1.Location = new System.Drawing.Point(0, 12);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(836, 487);
+            this.tabControl1.Size = new System.Drawing.Size(857, 476);
             this.tabControl1.TabIndex = 0;
+            this.tabControl1.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.tabControl1_KeyPress);
             // 
             // tabPageLogin
             // 
@@ -86,7 +97,7 @@
             this.tabPageLogin.Location = new System.Drawing.Point(4, 22);
             this.tabPageLogin.Name = "tabPageLogin";
             this.tabPageLogin.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPageLogin.Size = new System.Drawing.Size(828, 461);
+            this.tabPageLogin.Size = new System.Drawing.Size(849, 450);
             this.tabPageLogin.TabIndex = 0;
             this.tabPageLogin.Text = "Login";
             this.tabPageLogin.UseVisualStyleBackColor = true;
@@ -179,7 +190,7 @@
             this.tabPageCollection.Location = new System.Drawing.Point(4, 22);
             this.tabPageCollection.Name = "tabPageCollection";
             this.tabPageCollection.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPageCollection.Size = new System.Drawing.Size(828, 461);
+            this.tabPageCollection.Size = new System.Drawing.Size(849, 450);
             this.tabPageCollection.TabIndex = 1;
             this.tabPageCollection.Text = "Collection";
             this.tabPageCollection.UseVisualStyleBackColor = true;
@@ -231,18 +242,57 @@
             // 
             // tabPageStore
             // 
+            this.tabPageStore.Controls.Add(this.comboBox1);
+            this.tabPageStore.Controls.Add(this.button1);
+            this.tabPageStore.Controls.Add(this.label7);
+            this.tabPageStore.Controls.Add(this.label6);
             this.tabPageStore.Controls.Add(this.buttonBuy);
             this.tabPageStore.Location = new System.Drawing.Point(4, 22);
             this.tabPageStore.Name = "tabPageStore";
             this.tabPageStore.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPageStore.Size = new System.Drawing.Size(828, 461);
+            this.tabPageStore.Size = new System.Drawing.Size(849, 450);
             this.tabPageStore.TabIndex = 2;
             this.tabPageStore.Text = "Store";
             this.tabPageStore.UseVisualStyleBackColor = true;
             // 
+            // comboBox1
+            // 
+            this.comboBox1.FormattingEnabled = true;
+            this.comboBox1.Location = new System.Drawing.Point(205, 94);
+            this.comboBox1.Name = "comboBox1";
+            this.comboBox1.Size = new System.Drawing.Size(121, 21);
+            this.comboBox1.TabIndex = 3;
+            // 
+            // button1
+            // 
+            this.button1.Location = new System.Drawing.Point(205, 134);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(75, 23);
+            this.button1.TabIndex = 2;
+            this.button1.Text = "Buy";
+            this.button1.UseVisualStyleBackColor = true;
+            // 
+            // label7
+            // 
+            this.label7.AutoSize = true;
+            this.label7.Location = new System.Drawing.Point(202, 66);
+            this.label7.Name = "label7";
+            this.label7.Size = new System.Drawing.Size(73, 13);
+            this.label7.TabIndex = 1;
+            this.label7.Text = "Theme Packs";
+            // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.Location = new System.Drawing.Point(59, 66);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(56, 13);
+            this.label6.TabIndex = 1;
+            this.label6.Text = "Foil Packs";
+            // 
             // buttonBuy
             // 
-            this.buttonBuy.Location = new System.Drawing.Point(57, 75);
+            this.buttonBuy.Location = new System.Drawing.Point(62, 94);
             this.buttonBuy.Name = "buttonBuy";
             this.buttonBuy.Size = new System.Drawing.Size(75, 23);
             this.buttonBuy.TabIndex = 0;
@@ -258,17 +308,66 @@
             this.tabPageLobby.Location = new System.Drawing.Point(4, 22);
             this.tabPageLobby.Name = "tabPageLobby";
             this.tabPageLobby.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPageLobby.Size = new System.Drawing.Size(828, 461);
+            this.tabPageLobby.Size = new System.Drawing.Size(849, 450);
             this.tabPageLobby.TabIndex = 3;
             this.tabPageLobby.Text = "Lobby";
             this.tabPageLobby.UseVisualStyleBackColor = true;
             // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Location = new System.Drawing.Point(13, 428);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(29, 13);
+            this.label5.TabIndex = 2;
+            this.label5.Text = "Chat";
+            // 
+            // buttonChat
+            // 
+            this.buttonChat.Location = new System.Drawing.Point(585, 422);
+            this.buttonChat.Name = "buttonChat";
+            this.buttonChat.Size = new System.Drawing.Size(75, 23);
+            this.buttonChat.TabIndex = 1;
+            this.buttonChat.Text = "Send";
+            this.buttonChat.UseVisualStyleBackColor = true;
+            this.buttonChat.Click += new System.EventHandler(this.buttonChat_Click);
+            // 
+            // textBoxChat
+            // 
+            this.textBoxChat.Location = new System.Drawing.Point(54, 425);
+            this.textBoxChat.Name = "textBoxChat";
+            this.textBoxChat.Size = new System.Drawing.Size(511, 20);
+            this.textBoxChat.TabIndex = 0;
+            // 
+            // tabPageGame
+            // 
+            this.tabPageGame.Location = new System.Drawing.Point(4, 22);
+            this.tabPageGame.Name = "tabPageGame";
+            this.tabPageGame.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPageGame.Size = new System.Drawing.Size(849, 450);
+            this.tabPageGame.TabIndex = 4;
+            this.tabPageGame.Text = "Game";
+            this.tabPageGame.UseVisualStyleBackColor = true;
+            // 
+            // tabPageAdmin
+            // 
+            this.tabPageAdmin.Location = new System.Drawing.Point(4, 22);
+            this.tabPageAdmin.Name = "tabPageAdmin";
+            this.tabPageAdmin.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPageAdmin.Size = new System.Drawing.Size(849, 450);
+            this.tabPageAdmin.TabIndex = 5;
+            this.tabPageAdmin.Text = "Admin";
+            this.tabPageAdmin.UseVisualStyleBackColor = true;
+            // 
             // listBoxResults
             // 
+            this.listBoxResults.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+                        | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
             this.listBoxResults.FormattingEnabled = true;
-            this.listBoxResults.Location = new System.Drawing.Point(12, 501);
+            this.listBoxResults.Location = new System.Drawing.Point(0, 494);
             this.listBoxResults.Name = "listBoxResults";
-            this.listBoxResults.Size = new System.Drawing.Size(832, 121);
+            this.listBoxResults.Size = new System.Drawing.Size(857, 134);
             this.listBoxResults.TabIndex = 4;
             // 
             // statusStrip1
@@ -284,39 +383,13 @@
             // toolStripStatusLabel1
             // 
             this.toolStripStatusLabel1.Name = "toolStripStatusLabel1";
-            this.toolStripStatusLabel1.Size = new System.Drawing.Size(109, 17);
+            this.toolStripStatusLabel1.Size = new System.Drawing.Size(118, 17);
             this.toolStripStatusLabel1.Text = "toolStripStatusLabel1";
             // 
             // notifyIcon1
             // 
             this.notifyIcon1.Text = "notifyIcon1";
             this.notifyIcon1.Visible = true;
-            // 
-            // textBoxChat
-            // 
-            this.textBoxChat.Location = new System.Drawing.Point(54, 425);
-            this.textBoxChat.Name = "textBoxChat";
-            this.textBoxChat.Size = new System.Drawing.Size(511, 20);
-            this.textBoxChat.TabIndex = 0;
-            // 
-            // buttonChat
-            // 
-            this.buttonChat.Location = new System.Drawing.Point(585, 422);
-            this.buttonChat.Name = "buttonChat";
-            this.buttonChat.Size = new System.Drawing.Size(75, 23);
-            this.buttonChat.TabIndex = 1;
-            this.buttonChat.Text = "Send";
-            this.buttonChat.UseVisualStyleBackColor = true;
-            this.buttonChat.Click += new System.EventHandler(this.buttonChat_Click);
-            // 
-            // label5
-            // 
-            this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(13, 428);
-            this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(29, 13);
-            this.label5.TabIndex = 2;
-            this.label5.Text = "Chat";
             // 
             // MTGClientForm
             // 
@@ -339,6 +412,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewDeck)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewCollection)).EndInit();
             this.tabPageStore.ResumeLayout(false);
+            this.tabPageStore.PerformLayout();
             this.tabPageLobby.ResumeLayout(false);
             this.tabPageLobby.PerformLayout();
             this.statusStrip1.ResumeLayout(false);
@@ -376,6 +450,12 @@
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.Button buttonChat;
         private System.Windows.Forms.TextBox textBoxChat;
+        private System.Windows.Forms.ComboBox comboBox1;
+        private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.Label label7;
+        private System.Windows.Forms.Label label6;
+        private System.Windows.Forms.TabPage tabPageGame;
+        private System.Windows.Forms.TabPage tabPageAdmin;
     }
 }
 
