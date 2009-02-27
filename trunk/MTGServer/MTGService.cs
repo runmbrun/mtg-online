@@ -432,87 +432,80 @@ namespace MTGServer
                     // *** Buy ***
                     case MTGNetworkPacket.MTGOpCode.Purchase:
 
-                        Int32 Number = Convert.ToInt32(msgReceived.Data.ToString());
+                        // Determine what is purchased
+                        String Purchase = msgReceived.Data.ToString();
+                        MTGCollection Collection = DeterminePurchases(Purchase);
 
-                        /*
-                        ArrayList CardPack = new ArrayList();
-                        
-
-                        // mmb - can buy multiple card packs
-                        for (Int32 i = 0; i < Number; i++)
-                        {
-                            MTGCard card = new MTGCard();
-                            card.ID = 129559;
-                            card.Name = "Forest";
-                            card.Power = "-1";
-                            card.Toughness = "-1";
-                            card.Type = "Land";
-                            CardPack.Add(card);
-
-                            card = new MTGCard();
-                            card.ID = 129459;
-                            card.Name = "Air Elemental";
-                            card.Power = "4";
-                            card.Toughness = "4";
-                            card.Type = "Creature - Elemental";
-                            CardPack.Add(card);
-
-                            card = new MTGCard();
-                            card.ID = 129495;
-                            card.Name = "Battle Gnomes";
-                            card.Power = "0";
-                            card.Toughness = "3";
-                            card.Type = "Creature - Elemental";
-                            CardPack.Add(card);
-                        }
-                         * */
-
-                        MTGCollection Collection = new MTGCollection();
-                        Collection.Cards.Add(129559);
-                        Collection.Cards.Add(129459);
-                        Collection.Cards.Add(129495);
-
-                        //
+                        // send back the udpated collection with the purchased items in it
                         msgToSend.OpCode = MTGNetworkPacket.MTGOpCode.PurchaseReceive;
-                        //msgToSend.Data = CardPack;
                         msgToSend.Data = Collection;
-
-                        message = msgToSend.ToByte();
-
-                        // send back the new collection with the purchased items in it
+                        message = msgToSend.ToByte();                        
                         clientSocket.BeginSend(message, 0, message.Length, SocketFlags.None, new AsyncCallback(OnSend), clientSocket);          
 
                         break;
 
                     // *** Chat ***
                     case MTGNetworkPacket.MTGOpCode.Chat:
-                        // Send this chat to all other online players
-                                                
-                        // verify that this user can log on
+                        
+                        // First, get the string 
                         String ChatData = msgReceived.Data.ToString();
+
+                        // now find out the player's name
                         foreach (ClientInfo client in ClientList)
                         {
                             if (client.Socket == clientSocket)
                             {
                                 // this is the player, collect the name
                                 User = "[" + client.Player + "] ";
-
                             }
-                        }                        
-                        // send chat message back to other players
-                        msgToSend.OpCode = MTGNetworkPacket.MTGOpCode.Chat;
-                        msgToSend.Data = User + ChatData;
+                        }
 
-                        message = msgToSend.ToByte();
-
-                        foreach (ClientInfo client in ClientList)
+                        // Check to see if this is a command
+                        // examples:
+                        // /who
+                        // /help
+                        // /commands
+                        // /friends
+                        if (ChatData.StartsWith("/"))
                         {
-                            if (client.Socket != clientSocket)
+                            String Outbound = "UNKOWN";
+
+
+                            switch (ChatData.Substring(1).ToUpper())
+                            {
+                                case "WHO":
+                                    // list all the online players
+                                    // mmb - TODO
+                                    Outbound = "An unknown number of people are online";
+                                    break;
+                                default:
+                                    Outbound = "Unknown Command";
+                                    break;
+                            }
+
+                            // Create the outgoing chat packet
+                            msgToSend.OpCode = MTGNetworkPacket.MTGOpCode.Chat;
+                            msgToSend.Data = Outbound;
+                            message = msgToSend.ToByte();
+                            clientSocket.BeginSend(message, 0, message.Length, SocketFlags.None, new AsyncCallback(OnSend), clientSocket);
+                        }
+                        else
+                        {
+                            // This is just a normal chat message, so send it to all the other online players
+
+                            // Create the outgoing chat packet
+                            msgToSend.OpCode = MTGNetworkPacket.MTGOpCode.Chat;
+                            msgToSend.Data = User + ChatData;
+
+                            message = msgToSend.ToByte();
+
+                            foreach (ClientInfo client in ClientList)
                             {
                                 // send chat message back to other players
+                                // including the player who sent it
                                 client.Socket.BeginSend(message, 0, message.Length, SocketFlags.None, new AsyncCallback(OnSend), client.Socket);
                             }
-                        }                        
+                        }
 
                         break;
 
@@ -534,6 +527,92 @@ namespace MTGServer
             {
                 AddError(String.Format("OnReceive: {0}", ex.Message));
             }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="Purchase"></param>
+        /// <returns></returns>
+        private MTGCollection DeterminePurchases(String Purchase)
+        {
+            MTGCollection Collection = new MTGCollection();
+
+            // mmb - todo:
+
+            // Info about Purchase String
+            // Edition:TypeOfPurchase:Quanity
+            // Edition Example: 10th is the only edition we have right now.
+            // TypeOfPurchase Example: Foil, Preconstructed Theme Deck, Starter Deck, and/or Fat Pack
+            // Quantity Example:  1, 2, 3, etc.  How many do they want to buy?
+
+
+//Set 	                    Set symbol 	            Set code     	Release date 	    Size    Common 	Uncommon 	Rare 	Basic Land 	Other
+//Core Set - Tenth Edition 	A Roman-numeral ten 	10E 	        July 14, 2007[13] 	383 	121 	121 	    121 	20 	        —
+            // Foil = 15 Cards.  1 Land, 1 Rare or Mythic Rare, 3 Uncommon, and 10 Common.
+
+
+            //Tenth Edition  features 383 cards, including randomly inserted premium versions of all cards in the set. 
+            //It is available in booster packs, preconstructed theme decks, fat packs, and two-player starter packs.
+
+            // Magic the Gathering Tenth Edition Core Set includes: 
+            // a Player's Guide with complete visual encyclopedia, 
+            // two card boxes with panoramic art and six plastic dividers, 
+            // six Tenth Edition booster packs, 
+            // 40 card Tenth Edition basic land pack, 
+            // Tenth Edition Spindown life counter, (available only in the fat pack), 
+            // plus one random Pro Tour Player card. 
+            
+            // Magic The Gathering - 10th Edition Theme Deck Set Of 5 Includes
+            // Each starter theme deck includes a pre-constructed, ready to play 40-card deck
+            // A strategy insert, and a random Pro Player card.
+            // Theme deck includes:
+            // Kamahl's Temper (Red), Arcanis's Guile (Blue), Molimo's Might (Green) , Evincar's Tyranny (Black), Cho-Manno's Resolve (White) Theme Decks
+
+            /*
+             * 	
+Kamahl's Temper
+Core Set - Tenth Edition Theme Deck
+            
+             * Patience is no virtue. With the pit fighter Kamahl and a horde of temper-challenged "haste" creatures at your command, 
+             * you'll scorch your way to victory before your enemy even finds the snooze button. 
+             * Attack and burn anything that stands in your way. Why wait?
+
+#	Name	            Rarity	Cost
+1	Raging Goblin	        C   Red Mana
+1	Viashino Sandscout	    C	1 ManaRed Mana
+2	Bloodrock Cyclops	    C	2 ManaRed Mana
+2	Bogardan Firefiend	    C	2 ManaRed Mana
+1	Prodigal Pyromancer	    C	2 ManaRed Mana
+2	Lightning Elemental	    C	3 ManaRed Mana
+1	Furnace Whelp	        U	2 ManaRed ManaRed Mana
+2	Thundering Giant	    U	3 ManaRed ManaRed Mana
+1	Kamahl, Pit Fighter	    R	4 ManaRed ManaRed Mana
+1	Shock	                C	Red Mana
+2	Incinerate	            C	1 ManaRed Mana
+2	Spitting Earth	        C	1 ManaRed Mana
+1	Threaten	            U   2 ManaRed Mana
+1	Beacon of Destruction	R	3 ManaRed ManaRed Mana
+1	Blaze	                U	X ManaRed Mana
+1	Dragon's Claw	        U	2 Mana
+1	Phyrexian Vault	        U	3 Mana
+17	Mountain		
+	Kamahl's Temper
+
+* = from a previous set
+             * */
+
+            // mmb - testing for now
+            Collection.Cards.Add(129559);
+            Collection.Cards.Add(129459);
+            Collection.Cards.Add(129495);
+
+            // Add these purchases to the player's current collection
+
+            // if this is a preconstructed theme deck, then add it to the decks too
+
+            // send back the players newly updated collection
+            return Collection;
         }
 
         /// <summary>
