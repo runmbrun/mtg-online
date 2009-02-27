@@ -437,11 +437,10 @@ namespace MTGClient
 
                             case MTGNetworkPacket.MTGOpCode.PurchaseReceive:
                                 LogDebug("PurchaseReceive: [" + packet.Data.ToString() + "]");
-                                //ArrayList List = (ArrayList)packet.Data;
                                 MTGCollection NewCards = (MTGCollection)packet.Data;
-                                UpdateStatusStrip("New Foil of cards bought.");
+                                UpdateStatusStrip("Purchase made.");
                                 AddToCollection(NewCards);
-                                UpdateStatusStrip("New Foil of cards added to collection.");
+                                UpdateStatusStrip("New purchase of cards have been added to your collection.");
                                 break;
 
                             case MTGNetworkPacket.MTGOpCode.ReceiveCollection:
@@ -909,7 +908,7 @@ namespace MTGClient
                 clientSocket.BeginSend(ConvertedData, 0, ConvertedData.Length, SocketFlags.None, new AsyncCallback(OnSendAndWait), null);
 
                 LogInfo("Client is sending a PURCHASE message to server.");
-                UpdateStatusStrip("Attempting to buy a foil of cards...");
+                UpdateStatusStrip("Attempting to buy a Preconstructed Theme Deck...");
             }
         }
     }
