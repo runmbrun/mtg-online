@@ -28,7 +28,7 @@ namespace MTGClient
         // Class vars
         Boolean Connected = false;
         Boolean Receiving = false;
-
+        
         // Network vars
         public Socket clientSocket; //The main client socket
         private byte[] byteData;
@@ -41,7 +41,12 @@ namespace MTGClient
         // Card Sets
         ArrayList CardSets;
         MTGCollection Collection;
-        Boolean Admin;
+        Boolean Admin = false;
+        Boolean Gaming = false;
+
+        // Game
+        Game CurrentGame;
+
 
 
         /// <summary>
@@ -68,7 +73,7 @@ namespace MTGClient
             try
             {                
                 // Attempt to load the last cardset saved
-                Stream stream = File.Open("10.dat", FileMode.Open);
+                Stream stream = File.Open("10E.dat", FileMode.Open);
                 BinaryFormatter bformatter = new BinaryFormatter();
 
                 MTGCardSet cards = new MTGCardSet();
@@ -90,8 +95,6 @@ namespace MTGClient
             }
             
             WaitingData = new byte[PacketSize];
-
-            Admin = false;
         }
 
         #region DataGridVew Functions
@@ -128,7 +131,7 @@ namespace MTGClient
         /// <summary>
         /// 
         /// </summary>
-        private void UpdateGrid()
+        private void UpdateCollectionGrid()
         {
             dataGridViewCollection.Columns[0].Visible = false;
             dataGridViewCollection.Columns[6].Visible = false;
@@ -139,6 +142,22 @@ namespace MTGClient
             dataGridViewCollection.AutoResizeColumns();
             dataGridViewCollection.AutoResizeRows();
             dataGridViewCollection.Refresh();
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        private void UpdateDeckGrid()
+        {
+            dataGridViewDeck.Columns[0].Visible = false;
+            dataGridViewDeck.Columns[6].Visible = false;
+            dataGridViewDeck.Columns[7].Visible = false;
+            dataGridViewDeck.Columns[8].Visible = false;
+            dataGridViewDeck.Columns[9].Visible = false;
+            dataGridViewDeck.Columns[10].Visible = false;
+            dataGridViewDeck.AutoResizeColumns();
+            dataGridViewDeck.AutoResizeRows();
+            dataGridViewDeck.Refresh();
         }
 
         #endregion
@@ -508,6 +527,7 @@ namespace MTGClient
                 ArrayList Display = new ArrayList();
 
 
+                // update the collection data grid
                 Collection.Add(NewCards);            
                 
                 foreach (Int32 cardnumber in Collection.Cards)
@@ -519,13 +539,32 @@ namespace MTGClient
                         if (cardInfo.ID == cardnumber)
                         {
                             card = cardInfo;
-                            Display.Add(card);
+                            if (Display.Contains(card))
+                            {
+                                // increment the quantity
+                                Int32 index = Display.IndexOf(card);
+                                ((MTGCard)Display[index]).Quantity += 1;
+                            }
+                            else
+                            {
+                                Display.Add(card);
+                            }                            
                             break;
                         }
                     }
                 }
             
                 UpdateCollection(Display);
+
+                Display = new ArrayList();
+
+                UpdateCombo("Create New");
+                // now update the combobox
+                foreach (String DeckName in Collection.Decks.Keys)
+                {
+                    UpdateCombo(DeckName);
+                    UpdateCombo2(DeckName);
+                }
             }
             catch (Exception ex)
             {
@@ -625,6 +664,9 @@ namespace MTGClient
         delegate void SetLoginButtonTextCallback(String Text);
         delegate void UpdateStatusStripCallback(String Text);
         delegate void UpdateCollectionCallback(ArrayList NewCards);
+        delegate void UpdateDecksCallback(ArrayList NewCards);
+        delegate void UpdateComboCallback(String Name);
+        delegate void UpdateCombo2Callback(String Name);
 
         public void EnableLoginButton(Boolean Enable)
         {
@@ -660,12 +702,15 @@ namespace MTGClient
                 {
                     tabControl1.TabPages.Add(tabPageCollection);
                     tabControl1.TabPages.Add(tabPageStore);
-                    tabControl1.TabPages.Add(tabPageLobby);
-                    tabControl1.TabPages.Add(tabPageGame);
+                    tabControl1.TabPages.Add(tabPageLobby);                    
 
                     if (this.Admin)
                     {
                         tabControl1.TabPages.Add(tabPageAdmin);
+                    }
+                    if (this.Gaming)
+                    {
+                        tabControl1.TabPages.Add(tabPageGame);
                     }
                 }
                 else
@@ -674,11 +719,7 @@ namespace MTGClient
                     tabControl1.TabPages.Remove(tabPageStore);
                     tabControl1.TabPages.Remove(tabPageLobby);
                     tabControl1.TabPages.Remove(tabPageGame);
-
-                    //if (this.Admin)
-                    {
-                        tabControl1.TabPages.Remove(tabPageAdmin);
-                    }
+                    tabControl1.TabPages.Remove(tabPageAdmin);
                 }
             }            
         }
@@ -765,7 +806,57 @@ namespace MTGClient
             {
                 // mmb - add to the current collection, don't overwrite
                 dataGridViewCollection.DataSource = NewCards;
-                UpdateGrid();
+                UpdateCollectionGrid();
+            }
+        }
+
+        public void UpdateDecks(ArrayList NewCards)
+        {
+            // InvokeRequired required compares the thread ID of the
+            // calling thread to the thread ID of the creating thread.
+            // If these threads are different, it returns true.
+            if (this.dataGridViewCollection.InvokeRequired)
+            {
+                UpdateDecksCallback d = new UpdateDecksCallback(UpdateDecks);
+                this.Invoke(d, new object[] { NewCards });
+            }
+            else
+            {
+                // mmb - add to the current deck, don't overwrite
+                dataGridViewDeck.DataSource = NewCards;
+                UpdateCollectionGrid();
+            }
+        }
+
+        public void UpdateCombo(String Name)
+        {
+            // InvokeRequired required compares the thread ID of the
+            // calling thread to the thread ID of the creating thread.
+            // If these threads are different, it returns true.
+            if (this.dataGridViewCollection.InvokeRequired)
+            {
+                UpdateComboCallback d = new UpdateComboCallback(UpdateCombo);
+                this.Invoke(d, new object[] { Name });
+            }
+            else
+            {
+                comboBoxDecks.Items.Add(Name);                
+            }
+        }
+
+        public void UpdateCombo2(String Name)
+        {
+            // InvokeRequired required compares the thread ID of the
+            // calling thread to the thread ID of the creating thread.
+            // If these threads are different, it returns true.
+            if (this.dataGridViewCollection.InvokeRequired)
+            {
+                UpdateCombo2Callback d = new UpdateCombo2Callback(UpdateCombo2);
+                this.Invoke(d, new object[] { Name });
+            }
+            else
+            {
+                comboBoxDecks2.Items.Add(Name);
             }
         }
 
@@ -910,6 +1001,142 @@ namespace MTGClient
                 LogInfo("Client is sending a PURCHASE message to server.");
                 UpdateStatusStrip("Attempting to buy a Preconstructed Theme Deck...");
             }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void dataGridViewCollection_ColumnHeaderMouseClick(object sender, DataGridViewCellMouseEventArgs e)
+        {
+            this.Cursor = Cursors.WaitCursor;
+
+            // sort by column header
+            MTGCardSet Temp = new MTGCardSet();
+            Temp.CardSet = (ArrayList)dataGridViewCollection.DataSource;
+            Temp.Sort(e.ColumnIndex);
+
+            dataGridViewCollection.DataSource = Temp.CardSet;
+            UpdateCollectionGrid();
+
+            this.Cursor = Cursors.Default;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void dataGridViewDeck_ColumnHeaderMouseClick(object sender, DataGridViewCellMouseEventArgs e)
+        {
+            // mmb - todo
+            // copy from dataGridViewCollection_ColumnHeaderMouseClick()
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void comboBoxDecks_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            ArrayList Display = new ArrayList();
+            String DeckName = comboBoxDecks.SelectedItem.ToString();
+
+
+            try
+            {
+                if (Collection.Decks.ContainsKey(DeckName))
+                {
+                    // update the decks data grid                                
+                    ArrayList Deck = Collection.Decks[DeckName];
+
+                    foreach (Int32 cardnumber in Deck)
+                    {
+                        MTGCard card = new MTGCard();
+
+                        foreach (MTGCard cardInfo in ((MTGCardSet)CardSets[0]).CardSet)
+                        {
+                            if (cardInfo.ID == cardnumber)
+                            {
+                                card = cardInfo;
+                                if (Display.Contains(card))
+                                {
+                                    // increment the quantity
+                                    Int32 index = Display.IndexOf(card);
+                                    ((MTGCard)Display[index]).Quantity += 1;
+                                }
+                                else
+                                {
+                                    Display.Add(card);
+                                }
+                            }
+                        }
+                    }
+                }
+
+                UpdateDecks(Display);
+            }
+            catch (Exception ex)
+            {
+                LogError("comboBoxDecks_SelectedIndexChanged:  Problem with combobox switch. [" + ex.Message + "]");
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void buttonGameSolitare_Click(object sender, EventArgs e)
+        {
+            // enable the game tab
+            Gaming = true;
+            EnableTabPages(false);
+            EnableTabPages(true);
+
+            // move tab focus to  the game tab
+            tabControl1.SelectTab(4);
+
+            // start the game!
+            String DeckName = comboBoxDecks2.SelectedItem.ToString();
+            ArrayList Cards = new ArrayList();
+
+            MTGDeck Deck = new MTGDeck();
+            Deck.Name = DeckName;
+
+            foreach (Int32 cardnumber in Collection.Decks[DeckName])
+            {
+                MTGCard card = new MTGCard();
+            
+                foreach (MTGCard cardInfo in ((MTGCardSet)CardSets[0]).CardSet)
+                {
+                    if (cardInfo.ID == cardnumber)
+                    {
+                        card = cardInfo;
+                        if (Cards.Contains(card))
+                        {
+                            // increment the quantity
+                            Int32 index = Cards.IndexOf(card);
+                            ((MTGCard)Cards[index]).Quantity += 1;
+                        }
+                        else
+                        {
+                            Cards.Add(card);
+                        }                            
+                        break;
+                    }
+                }
+            }
+
+            Deck.Cards = Cards;            
+
+            CurrentGame = new Game(this);
+            CurrentGame.AddPlayerDeck(Deck);
+            CurrentGame.StartSolitareGame();
+
+            Update();
         }
     }
 }

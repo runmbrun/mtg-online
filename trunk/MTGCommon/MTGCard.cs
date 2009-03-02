@@ -162,6 +162,8 @@ namespace MTG
                         return this._type.CompareTo(otherRowInformation._type);
                     case 4:
                         return this._power.CompareTo(otherRowInformation._power);
+                    case 5:
+                        return this._power.CompareTo(otherRowInformation._toughness);
                     case 11:
                         return Convert.ToInt32(this._quantity).CompareTo(Convert.ToInt32(otherRowInformation._quantity));
                     case 12:

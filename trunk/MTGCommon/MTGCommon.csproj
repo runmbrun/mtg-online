@@ -49,6 +49,7 @@
     <Compile Include="MTGCard.cs" />
     <Compile Include="MTGCardSet.cs" />
     <Compile Include="MTGCollection.cs" />
+    <Compile Include="MTGDeck.cs" />
     <Compile Include="MTGNetworkPacket.cs" />
     <Compile Include="MTGPicturePack.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
