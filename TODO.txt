@@ -13,7 +13,7 @@ Client Logon Screen:
 
 Client Collection Screen:
 - Have Server send Collection/Decks right away after logon
-- Collection needs to display card's text if that card is selected
+- Collection needs to display card's text if that card is selected.  ??? Can't they read it off the card?
 - Deck Creation and Updating
 
 
@@ -59,3 +59,58 @@ DataGatherer
 - Pull all the TenthE info better.  Get all 4 Land cards
 - Get and store mana
 
+
+
+
+
+
+
+
+
+
+Game Screen Mockup
+==================
+
+Left Side:
+Card Picture
+
+Turn Phase Description and Ok Button (to go to next phase)
+
+Phases:
+Untap
+Upkeep
+Draw
+Main
+Beginning Combat
+Declare Attackers
+Declare Blockers
+Combat Damage
+End of Combat
+Main
+End of Turn
+
+
+Left Sidebar:
+Opponent Health
+
+Opponent Mana Count
+
+Your Mana Count
+
+Your Health
+
+
+Main Screen
+
+Opponent Land
+
+Opponent Played Cards
+
+Your Played Cards
+
+Your Land
+
+
+Bottom Bar:
+
+Your drawn cards

@@ -50,13 +50,24 @@ namespace MTG
         /// <param name="NewCollection"></param>
         public void Add(MTGCollection NewCollection)
         {
+            // add this collection to our current collection
             foreach (Int32 cardnumber in NewCollection.Cards)
             {
                 Cards.Add(cardnumber);
             }
 
-            //mmb - todo
-            // update decks too
+            // Now add in the decks
+            foreach (String DeckName in NewCollection.Decks.Keys)
+            {
+                ArrayList Deck = new ArrayList();
+
+                foreach (Int32 cardnumber in NewCollection.Decks[DeckName])
+                {
+                    Deck.Add(cardnumber);
+                }
+
+                Decks.Add(DeckName, Deck);
+            }
         }
     }
 }
