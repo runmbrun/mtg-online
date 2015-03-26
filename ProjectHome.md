@@ -1,0 +1,1 @@
+This is a server and client game based on the Magic the Gathering ccg.
